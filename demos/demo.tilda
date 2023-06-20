@@ -1,0 +1,28 @@
+struct Student {
+    u16 id,
+    u8 year,
+    str name
+}
+
+void fizzbuzz(int n) {
+    for i in 0..n {
+        if i % 3 == 0
+            println()
+        else if i % 5 == 0
+            println("buzz")
+        else
+            println(n)
+    }
+}
+
+void main() {
+    u8 num = 1
+    u8 sum = num + 1
+    let dec = 10.25
+    str text = "Hello, 世界!"
+    Student pupil = {.id = 110411, .year 2, .name = "Sky"}
+
+    print(text)
+    fizzbuzz(sum)
+    print(pupil)
+}
