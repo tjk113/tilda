@@ -29,12 +29,11 @@ $(B)token.o: $(S)token.cpp $(I)token.hpp
 $(B)ast.o: $(S)ast.cpp $(I)expression.hpp $(I)statement.hpp $(I)token.hpp $(I)common.hpp
 	$(CC) -c $< -o $@ $(FLAGS)
 
-exe:
-	$(B)tilda.exe
-	@del $(OBJ_FILES)
+exe: $(B)tilda.exe
+	$(RM) $(OBJ_FILES)
 
 debug: FLAGS += -g
 debug: $(B)tilda.exe
 
 clean:
-	@del $(B)tilda.exe $(OBJ_FILES)
+	$(RM) $(B)tilda.exe $(OBJ_FILES)

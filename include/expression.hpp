@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <optional>
 #include <vector>
 #include <any>
 
@@ -103,25 +104,22 @@ struct CallExpression : Expression {
     std::any accept(ExpressionVisitor<std::any>& expression_visitor) const override;
 };
 
-/* TODO: decide whether to create UnaryLogicalExpression,
-BinaryLogicalExpression, UnaryBitwiseExpression, and
-BinaryBitwiseExpression structs, or flatten them into
-UnaryExpression and BinaryExpression */
-
 struct LogicalExpression : Expression {
     TokenType type;
     const Expression* l_operand;
-    const Expression* r_operand;
+    // r_operand is optional for LogicalExpressions
+    const Expression* r_operand = nullptr;
 
-    LogicalExpression(TokenType type, const Expression* l_operand, const Expression* r_operand);
+    LogicalExpression(TokenType type, const Expression* l_operand, const Expression* r_operand = nullptr);
     std::any accept(ExpressionVisitor<std::any>& expression_visitor) const override;
 };
 
 struct BitwiseExpression : Expression {
     TokenType type;
     const Expression* l_operand;
-    const Expression* r_operand;
+    // r_operand is optional for BitwiseExpressions
+    const Expression* r_operand = nullptr;
 
-    BitwiseExpression(TokenType type, const Expression* l_operand, const Expression* r_operand);
+    BitwiseExpression(TokenType type, const Expression* l_operand, const Expression* r_operand = nullptr);
     std::any accept(ExpressionVisitor<std::any>& expression_visitor) const override;
 };

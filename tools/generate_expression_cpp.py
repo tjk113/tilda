@@ -1,6 +1,6 @@
 import re
 
-type_names = ['TokenType', 'Token', 'const', 'Expression*', 'Expression', 'std::any', 'std::vector<const', 'std::vector<', 'Expression*>']
+type_names = ['TokenType', 'Token', 'const', 'Expression*', 'Expression', 'std::any', 'std::vector<const', 'std::vector<', 'Expression*>', '=', 'nullptr']
 
 expr_type_pattern = re.compile(r'struct (?P<type>[A-Za-z0-9]+) : Expression {')
 expr_constructor_pattern = r'\((?P<args>[\w,\*;:<> ]+)\);'
