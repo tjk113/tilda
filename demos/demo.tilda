@@ -20,7 +20,7 @@ void main() {
     u8 sum = num + 1
     let dec = 10.25
     str text = "Hello, 世界!"
-    Student pupil = {.id = 110411, .year 2, .name = "Sky"}
+    struct Student pupil = {.id = 110411, .year 2, .name = "Sky"}
 
     print(text)
     fizzbuzz(sum)

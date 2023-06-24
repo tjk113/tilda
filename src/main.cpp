@@ -7,11 +7,11 @@
 
 #include "scanner.hpp"
 #include "token.hpp"
+#include "ast.hpp"
 
 void print_token_values(std::vector<Token> toks) {
     for (Token tok : toks)
-        std::cout << tok.lexeme << " ";
-    std::cout << std::endl;
+        std::cout << Token::token_type_names[tok.type] << ": " << tok.lexeme << std::endl;
 }
 
 void from_file(std::string path) {
@@ -39,6 +39,10 @@ void from_repl() {
     while (std::cout << ">> " && std::getline(std::cin, line)) {
         if (line == "q")
             std::exit(0);
+        else if (line == "ast") {
+            AST::test();
+            continue;
+        }
         Scanner scanner(line);
         print_token_values(scanner.tokens);
     }

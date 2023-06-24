@@ -5,18 +5,19 @@ B = bin/
 
 FLAGS = -Iinclude/ -std=c++20
 
-OBJ_FILES = $(B)main.o $(B)expression.o $(B)scanner.o $(B)statement.o $(B)token.o
+OBJ_FILES = $(B)main.o $(B)expression.o $(B)scanner.o $(B)statement.o $(B)token.o $(B)ast.o
 
 $(B)tilda.exe: $(OBJ_FILES)
 	$(CC) $^ -o $@ $(FLAGS)
 
 $(B)main.o: $(S)main.cpp $(I)scanner.hpp $(I)token.hpp
+	mkdir -p $(B)
 	$(CC) -c $< -o $@ $(FLAGS)
 
 $(B)expression.o: $(S)expression.cpp $(I)expression.hpp
 	$(CC) -c $< -o $@ $(FLAGS)
 
-$(B)scanner.o: $(S)scanner.cpp $(I)scanner.hpp $(I)token.hpp
+$(B)scanner.o: $(S)scanner.cpp $(I)scanner.hpp $(I)token.hpp $(I)common.hpp
 	$(CC) -c $< -o $@ $(FLAGS)
 
 $(B)statement.o: $(S)statement.cpp $(I)statement.hpp
@@ -25,10 +26,15 @@ $(B)statement.o: $(S)statement.cpp $(I)statement.hpp
 $(B)token.o: $(S)token.cpp $(I)token.hpp
 	$(CC) -c $< -o $@ $(FLAGS)
 
-tilda:
-	exe
-	@del $(OBJ_FILES)
+$(B)ast.o: $(S)ast.cpp $(I)expression.hpp $(I)statement.hpp $(I)token.hpp $(I)common.hpp
+	$(CC) -c $< -o $@ $(FLAGS)
+
 exe:
-	tilda.exe
+	$(B)tilda.exe
+	@del $(OBJ_FILES)
+
+debug: FLAGS += -g
+debug: $(B)tilda.exe
+
 clean:
-	@del tilda.exe $(OBJ_FILES)
+	@del $(B)tilda.exe $(OBJ_FILES)

@@ -1,4 +1,7 @@
 # tilda
+a C-like general purpose programming language
+
+implementation informed by [Crafting Interpreters](https://craftinginterpreters.com/)
 
 ## keywords
 - `if`
@@ -25,6 +28,7 @@
 - `str`
 - `void`
 - `bool`
+- Pointers (`[TYPE]*`)
 
 ## operators
 ### language
@@ -33,12 +37,13 @@
 - RANGE `a..b`  
   Used in `for i in a..b` loops.
 - ACCESS `a.b`
+- DEREF `*a`
 ### mathematical
 - ADD `a + b`
 - SUB `a - b`
 - MUL `a * b`
 - DIV `a / b`
-- INT_DIV `a // b`
+- INT_DIV `a \ b`
 - POW `a**b`
 - NEG `-a`
 - MOD `a % b`
@@ -47,8 +52,8 @@
 ### logical
 - LESS `a < b`
 - GREATER `a > b`
-- LESS_EQ `a >= b`
-- GREATER_EQ `a <= b`
+- LESS_EQ `a <= b`
+- GREATER_EQ `a >= b`
 - N_EQ `a != b`
 - EQ `a == b`
 - OR `a || b`

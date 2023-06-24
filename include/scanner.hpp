@@ -1,12 +1,13 @@
 #pragma once
 
 #include <stdbool.h>
+#include <iostream>
 #include <vector>
 #include <string>
 #include <map>
 #include <any>
 
-#include "tokentype.hpp"
+#include "common.hpp"
 #include "token.hpp"
 
 class Scanner {
@@ -50,6 +51,7 @@ private:
     void handle_string();
     void handle_number();
     void handle_identifier_or_type();
+    void handle_two_char_operator(TokenType type, char next_char);
     void add_token(TokenType type);
     void add_token(TokenType type, std::any literal);
     void scan_token();
