@@ -20,9 +20,15 @@ enum TokenType {
     // Logical Operators
     LESS, GREATER, LESS_EQ, GREATER_EQ,
     NOT_EQ, EQ, L_OR, L_AND, L_XOR, L_NOT,
+    // Ternary Logical Operators
+    T_IF, T_ELSE, TERN, // not actually a tokenized operator
     // Bitwise Operators
     B_OR, B_AND, B_XOR, B_NOT,
-    LSHFT, RSHFT, CHK
+    LSHFT, RSHFT, CHK,
+    // Intrinsic Functions
+    PRINT, PRINTLN,
+    // End-of-file
+    END_TOKEN
 };
 
 struct Token {

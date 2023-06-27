@@ -1,5 +1,5 @@
 # tilda
-a C-like general purpose programming language
+a (very wip) C-like general purpose programming language
 
 implementation informed by [Crafting Interpreters](https://craftinginterpreters.com/)
 
@@ -8,6 +8,8 @@ implementation informed by [Crafting Interpreters](https://craftinginterpreters.
 - `else`
 - `while`
 - `for`
+- `break`
+- `continue`
 - `in`
 - `goto`
 - `switch`
@@ -54,12 +56,16 @@ implementation informed by [Crafting Interpreters](https://craftinginterpreters.
 - GREATER `a > b`
 - LESS_EQ `a <= b`
 - GREATER_EQ `a >= b`
-- N_EQ `a != b`
+- NOT_EQ `a != b`
 - EQ `a == b`
 - OR `a || b`
 - AND `a && b`
 - XOR `a ^^ b`
 - NOT `!a`
+#### ternary
+- T_IF `?`
+- T_ELSE `:`  
+  `a ? b : c`
 ### bitwise
 - OR  `a | b`
 - AND `a & b`

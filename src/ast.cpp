@@ -7,16 +7,14 @@
 
 #include "expression.hpp"
 #include "token.hpp"
+#include "common.hpp"
 #include "ast.hpp"
 
-// AST::AST(std::vector<Token> toks) {
-//     ;
-// }
-
-std::string AST::print(const Expression* expression) {
+std::string AST::print(ShrExprPtr expression) {
     return std::any_cast<std::string>(expression->accept(*this));
 }
 
+// TODO: why is this getting passed a LiteralExpression*???
 template<class... E>
 std::string AST::parenthesize(std::string label, E... expressions) {
     std::ostringstream buf;
@@ -30,28 +28,47 @@ std::string AST::parenthesize(std::string label, E... expressions) {
 
 void AST::test() {
     // literal strings must *always* be std::string, and not const char*!
-    LiteralExpression num1 = LiteralExpression(NUM, 3);
-    LiteralExpression num2 = LiteralExpression(NUM, 1);
-    LiteralExpression num3 = LiteralExpression(NUM, 42069);
-    UnaryExpression unary_expression = UnaryExpression(NEG, &num3);
-    GroupExpression group_expression = GroupExpression(&unary_expression);
-    BitwiseExpression bitwise_expression = BitwiseExpression(B_XOR, &num1, &num2);
-
-    BinaryExpression binary_expression(ADD, &num1, &group_expression);
+    ShrTernaryExprPtr ternary_expression = std::make_shared<TernaryExpression>
+    (TERN,
+        std::make_shared<LogicalExpression>(
+            EQ,
+            std::make_shared<LiteralExpression>(
+                STR, std::string("Jason")
+            ),
+            std::make_shared<LiteralExpression>(
+                STR, std::string("Mark")
+            )
+        ),
+        std::make_shared<LiteralExpression>(
+            NUM, 3
+        ),
+        std::make_shared<GroupExpression>(
+            std::make_shared<UnaryExpression>(
+                NEG, std::make_shared<LiteralExpression>(
+                    NUM, 5
+                )
+            )
+        )
+    );
 
     AST ast;
-    std::cout << ast.print(&bitwise_expression) << std::endl;
+    std::cout << ast.print(ternary_expression) << std::endl;
 }
 
-std::any AST::visit_unary_expression(const UnaryExpression* expression) {
+std::any AST::visit_unary_expression(ShrUnaryExprPtr expression) {
     return parenthesize(Token::token_type_names[expression->type], expression->operand);
 }
 
-std::any AST::visit_binary_expression(const BinaryExpression* expression) {
+std::any AST::visit_binary_expression(ShrBinaryExprPtr expression) {
     return parenthesize(Token::token_type_names[expression->type], expression->l_operand, expression->r_operand);
 }
 
-std::any AST::visit_literal_expression(const LiteralExpression* expression) {
+std::any AST::visit_ternary_expression(ShrTernaryExprPtr expression) {
+    return parenthesize(Token::token_type_names[expression->type], expression->condition, expression->l_operand, expression->r_operand);
+}
+
+std::any AST::visit_literal_expression(ShrLiteralExprPtr expression) {
+    auto value = expression->value;
     switch (expression->type) {
         case STR:
         case TYPE:
@@ -71,33 +88,35 @@ std::any AST::visit_literal_expression(const LiteralExpression* expression) {
     }
 }
 
-std::any AST::visit_group_expression(const GroupExpression* expression) {
+std::any AST::visit_group_expression(ShrGroupExprPtr expression) {
     return parenthesize("GROUP", expression->expression);
 }
 
-std::any AST::visit_assign_expression(const AssignExpression* expression) {
-    LiteralExpression identifier(IDENTIFIER, expression->identifier.lexeme);
-    return parenthesize("ASSIGN", &identifier, expression->expression);
+std::any AST::visit_assign_expression(ShrAssignExprPtr expression) {
+    ShrLiteralExprPtr identifier = std::make_shared<LiteralExpression>(
+        IDENTIFIER, expression->identifier.lexeme);
+    return parenthesize("ASSIGN", identifier, expression->expression);
 }
 
-std::any AST::visit_range_expression(const RangeExpression* expression) {
+std::any AST::visit_range_expression(ShrRangeExprPtr expression) {
     return parenthesize("RANGE", expression->l_operand, expression->r_operand);
 }
 
-std::any AST::visit_access_expression(const AccessExpression* expression) {
+std::any AST::visit_access_expression(ShrAccessExprPtr expression) {
     return parenthesize("ACCESS", expression->l_operand, expression->r_operand);
 }
 
-std::any AST::visit_call_expression(const CallExpression* expression) {
+std::any AST::visit_call_expression(ShrCallExprPtr expression) {
     // TODO: support unpacking vector into this function call so all arguments can be printed
-    LiteralExpression function_name(IDENTIFIER, expression->function_name.lexeme);
-    return parenthesize("CALL", &function_name, expression->arguments[0]);
+    ShrLiteralExprPtr function_name = std::make_shared<LiteralExpression>(
+        IDENTIFIER, expression->function_name.lexeme);
+    return parenthesize("CALL", function_name, expression->arguments[0]);
 }
 
-std::any AST::visit_logical_expression(const LogicalExpression* expression) {
+std::any AST::visit_logical_expression(ShrLogicalExprPtr expression) {
     return parenthesize(Token::token_type_names[expression->type], expression->l_operand, expression->r_operand);
 }
 
-std::any AST::visit_bitwise_expression(const BitwiseExpression* expression) {
+std::any AST::visit_bitwise_expression(ShrBitwiseExprPtr expression) {
     return parenthesize(Token::token_type_names[expression->type], expression->l_operand, expression->r_operand);
 }

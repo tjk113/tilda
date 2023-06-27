@@ -1,9 +1,9 @@
 import re
 
-type_names = ['TokenType', 'Token', 'const', 'Expression*', 'Expression', 'std::any', 'std::vector<const', 'std::vector<', 'Expression*>', '=', 'nullptr']
+type_names = ['TokenType', 'Token', 'const', 'std::any', '=', 'ShrExprPtr', 'std::vector<ShrExprPtr>']
 
-expr_type_pattern = re.compile(r'struct (?P<type>[A-Za-z0-9]+) : Expression {')
-expr_constructor_pattern = r'\((?P<args>[\w,\*;:<> ]+)\);'
+expr_type_pattern = re.compile(r'struct (?P<type>[A-Za-z0-9]+) : Expression, public std::enable_shared_from_this<[A-Za-z]+> {')
+expr_constructor_pattern = r'\((?P<args>[\w,\*;:<>_ ]+)\);'
 
 def generate_expr_dict() -> dict[str: str]:
     expr_types = {}
@@ -11,10 +11,10 @@ def generate_expr_dict() -> dict[str: str]:
     with open('include\\expression.hpp', 'r') as header_file:
         for line in header_file:
             if 'struct' in line and 'ExpressionVisitor' not in line \
-                and not line.count('Expression') == 1:
-                    expr_type = expr_type_pattern.match(line).group('type')
+                and line.count('Expression') > 2:
+                    expr_type = expr_type_pattern.search(line).group('type')
                     continue
-            if expr_type and expr_type in line:
+            if expr_type and expr_type in line and '//' not in line:
                 pattern = f'{expr_type}{expr_constructor_pattern}'
                 expr_args = re.search(pattern, line).group('args')
                 expr_types[expr_type] = expr_args
@@ -38,8 +38,8 @@ def write_expression_cpp(expr_types: dict) -> None:
 {expr_type}::{expr_type}({expr_args}) :
     {param_assignments}
 
-std::any {expr_type}::accept(ExpressionVisitor<std::any>& visitor) const {{
-    return visitor.visit_{expr_type_name}_expression(this);
+std::any {expr_type}::accept(ExpressionVisitor<std::any>& visitor) {{
+    return visitor.visit_{expr_type_name}_expression(shared_from_this());
 }}
 ''')
             

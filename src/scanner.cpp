@@ -155,6 +155,8 @@ void Scanner::scan_token() {
         case '|': peek_next() == '|' ? handle_two_char_operator(L_OR, '|') : add_token(B_OR); break;
         case '&': peek_next() == '&' ? handle_two_char_operator(L_AND, '&') : add_token(B_AND); break;
         case '^': peek_next() == '^' ? handle_two_char_operator(L_XOR, '^') : add_token(B_XOR); break;
+        case '?': add_token(T_IF); break;
+        case ':': add_token(T_ELSE); break;
         case '~': add_token(B_NOT); break;
         case '@': add_token(CHK); break;
         // Ignore whitespace
@@ -178,6 +180,7 @@ void Scanner::scan_tokens() {
         start = current;
         scan_token();
     }
+    tokens.push_back(Token(END_TOKEN, "", NULL, line));
 }
 
 void Scanner::throw_error(std::string message) {

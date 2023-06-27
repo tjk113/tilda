@@ -5,7 +5,10 @@
 #include <string>
 #include <vector>
 
+#include "expression.hpp"
 #include "scanner.hpp"
+#include "parser.hpp"
+#include "tilda.hpp"
 #include "token.hpp"
 #include "ast.hpp"
 
@@ -28,12 +31,16 @@ void from_file(std::string path) {
     }
 
     Scanner scanner(src);
-    print_token_values(scanner.tokens);
+    Parser parser(scanner.tokens);
+    ShrExprPtr expression = parser.parse();
+    AST ast;
+    std::cout << ast.print(expression) << std::endl;
+    // print_token_values(scanner.tokens);
 }
 
 void from_repl() {
     std::string line;
-    std::cout << "tilda | beta v0.1" << std::endl;
+    std::cout << "tilda | alpha v0.1" << std::endl;
 
     // Main loop
     while (std::cout << ">> " && std::getline(std::cin, line)) {
@@ -44,7 +51,11 @@ void from_repl() {
             continue;
         }
         Scanner scanner(line);
-        print_token_values(scanner.tokens);
+        Parser parser(scanner.tokens);
+        ShrExprPtr expression = parser.parse();
+        AST ast;
+        std::cout << ast.print(expression) << std::endl;
+        // print_token_values(scanner.tokens);
     }
 }
 

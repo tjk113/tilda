@@ -1,72 +1,79 @@
 #include "expression.hpp"
 #include <any>
 
-UnaryExpression::UnaryExpression(TokenType type, const Expression* operand) :
+UnaryExpression::UnaryExpression(TokenType type, ShrExprPtr operand) :
     type(type), operand(operand) {}
 
-std::any UnaryExpression::accept(ExpressionVisitor<std::any>& visitor) const {
-    return visitor.visit_unary_expression(this);
+std::any UnaryExpression::accept(ExpressionVisitor<std::any>& visitor) {
+    return visitor.visit_unary_expression(shared_from_this());
 }
 
-BinaryExpression::BinaryExpression(TokenType type, const Expression* l_operand, const Expression* r_operand) :
+BinaryExpression::BinaryExpression(TokenType type, ShrExprPtr l_operand, ShrExprPtr r_operand) :
     type(type), l_operand(l_operand), r_operand(r_operand) {}
 
-std::any BinaryExpression::accept(ExpressionVisitor<std::any>& visitor) const {
-    return visitor.visit_binary_expression(this);
+std::any BinaryExpression::accept(ExpressionVisitor<std::any>& visitor) {
+    return visitor.visit_binary_expression(shared_from_this());
+}
+
+TernaryExpression::TernaryExpression(TokenType type, ShrExprPtr condition, ShrExprPtr l_operand, ShrExprPtr r_operand) :
+    type(type), condition(condition), l_operand(l_operand), r_operand(r_operand) {}
+
+std::any TernaryExpression::accept(ExpressionVisitor<std::any>& visitor) {
+    return visitor.visit_ternary_expression(shared_from_this());
 }
 
 LiteralExpression::LiteralExpression(TokenType type, std::any value) :
     type(type), value(value) {}
 
-std::any LiteralExpression::accept(ExpressionVisitor<std::any>& visitor) const {
-    return visitor.visit_literal_expression(this);
+std::any LiteralExpression::accept(ExpressionVisitor<std::any>& visitor) {
+    return visitor.visit_literal_expression(shared_from_this());
 }
 
-GroupExpression::GroupExpression(const Expression* expression) :
+GroupExpression::GroupExpression(ShrExprPtr expression) :
     expression(expression) {}
 
-std::any GroupExpression::accept(ExpressionVisitor<std::any>& visitor) const {
-    return visitor.visit_group_expression(this);
+std::any GroupExpression::accept(ExpressionVisitor<std::any>& visitor) {
+    return visitor.visit_group_expression(shared_from_this());
 }
 
-AssignExpression::AssignExpression(Token identifier, const Expression* expression) :
+AssignExpression::AssignExpression(Token identifier, ShrExprPtr expression) :
     identifier(identifier), expression(expression) {}
 
-std::any AssignExpression::accept(ExpressionVisitor<std::any>& visitor) const {
-    return visitor.visit_assign_expression(this);
+std::any AssignExpression::accept(ExpressionVisitor<std::any>& visitor) {
+    return visitor.visit_assign_expression(shared_from_this());
 }
 
-RangeExpression::RangeExpression(const Expression* l_operand, const Expression* r_operand) :
+RangeExpression::RangeExpression(ShrExprPtr l_operand, ShrExprPtr r_operand) :
     l_operand(l_operand), r_operand(r_operand) {}
 
-std::any RangeExpression::accept(ExpressionVisitor<std::any>& visitor) const {
-    return visitor.visit_range_expression(this);
+std::any RangeExpression::accept(ExpressionVisitor<std::any>& visitor) {
+    return visitor.visit_range_expression(shared_from_this());
 }
 
-AccessExpression::AccessExpression(const Expression* l_operand, const Expression* r_operand) :
+AccessExpression::AccessExpression(ShrExprPtr l_operand, ShrExprPtr r_operand) :
     l_operand(l_operand), r_operand(r_operand) {}
 
-std::any AccessExpression::accept(ExpressionVisitor<std::any>& visitor) const {
-    return visitor.visit_access_expression(this);
+std::any AccessExpression::accept(ExpressionVisitor<std::any>& visitor) {
+    return visitor.visit_access_expression(shared_from_this());
 }
 
-CallExpression::CallExpression(Token function_name, std::vector<const Expression*> arguments) :
+CallExpression::CallExpression(Token function_name, std::vector<ShrExprPtr> arguments) :
     function_name(function_name), arguments(arguments) {}
 
-std::any CallExpression::accept(ExpressionVisitor<std::any>& visitor) const {
-    return visitor.visit_call_expression(this);
+std::any CallExpression::accept(ExpressionVisitor<std::any>& visitor) {
+    return visitor.visit_call_expression(shared_from_this());
 }
 
-LogicalExpression::LogicalExpression(TokenType type, const Expression* l_operand, const Expression* r_operand) :
+LogicalExpression::LogicalExpression(TokenType type, ShrExprPtr l_operand, ShrExprPtr r_operand) :
     type(type), l_operand(l_operand), r_operand(r_operand) {}
 
-std::any LogicalExpression::accept(ExpressionVisitor<std::any>& visitor) const {
-    return visitor.visit_logical_expression(this);
+std::any LogicalExpression::accept(ExpressionVisitor<std::any>& visitor) {
+    return visitor.visit_logical_expression(shared_from_this());
 }
 
-BitwiseExpression::BitwiseExpression(TokenType type, const Expression* l_operand, const Expression* r_operand) :
+BitwiseExpression::BitwiseExpression(TokenType type, ShrExprPtr l_operand, ShrExprPtr r_operand) :
     type(type), l_operand(l_operand), r_operand(r_operand) {}
 
-std::any BitwiseExpression::accept(ExpressionVisitor<std::any>& visitor) const {
-    return visitor.visit_bitwise_expression(this);
+std::any BitwiseExpression::accept(ExpressionVisitor<std::any>& visitor) {
+    return visitor.visit_bitwise_expression(shared_from_this());
 }

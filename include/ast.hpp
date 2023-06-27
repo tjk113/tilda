@@ -23,19 +23,20 @@ struct AST : ExpressionVisitor<std::any> {
 
     AST() = default;
     
-    std::string print(const Expression* expression);
+    std::string print(ShrExprPtr expression);
     template<class... E>
     std::string parenthesize(std::string label, E... expressions);
     static void test();
 
-    std::any visit_unary_expression(const UnaryExpression* expression);
-    std::any visit_binary_expression(const BinaryExpression* expression);
-    std::any visit_literal_expression(const LiteralExpression* expression);
-    std::any visit_group_expression(const GroupExpression* expression);
-    std::any visit_assign_expression(const AssignExpression* expression);
-    std::any visit_range_expression(const RangeExpression* expression);
-    std::any visit_access_expression(const AccessExpression* expression);
-    std::any visit_call_expression(const CallExpression* expression);
-    std::any visit_logical_expression(const LogicalExpression* expression);
-    std::any visit_bitwise_expression(const BitwiseExpression* expression);
+    std::any visit_unary_expression(ShrUnaryExprPtr expression);
+    std::any visit_binary_expression(ShrBinaryExprPtr expression);
+    std::any visit_ternary_expression(ShrTernaryExprPtr expression);
+    std::any visit_literal_expression(ShrLiteralExprPtr expression);
+    std::any visit_group_expression(ShrGroupExprPtr expression);
+    std::any visit_assign_expression(ShrAssignExprPtr expression);
+    std::any visit_range_expression(ShrRangeExprPtr expression);
+    std::any visit_access_expression(ShrAccessExprPtr expression);
+    std::any visit_call_expression(ShrCallExprPtr expression);
+    std::any visit_logical_expression(ShrLogicalExprPtr expression);
+    std::any visit_bitwise_expression(ShrBitwiseExprPtr expression);
 };
