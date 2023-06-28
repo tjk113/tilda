@@ -12,13 +12,13 @@ equality&nbsp;&nbsp;&nbsp;-> comparison ( ( "!=" | "==" ) ) comparison )* ;
 
 comparison -> bitwise ( ( ">" | ">=" | "<" | "<=" ) bitwise )* ;
 
-bitwise&nbsp;&nbsp;&nbsp;&nbsp;-> term ( ( "|" | "&" | "^" | "@" | "<<" | ">>" ) term )* ;
+bitwise&nbsp;&nbsp;&nbsp;&nbsp;-> term ( ( "|" | "&" | "^" | "@" | "<<" | ">>" ) ( term | bitwise ) )* ;
 
 term&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-> factor ( ( "-" | "+" ) factor )* ;
 
-factor&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-> unary ( ( "/" | "\*" ) unary )\* ;
+factor&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-> unary ( ( "/" | "\*" | "\\" | "**" | "%" ) unary )\* ;
 
-unary&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-> ( "!" | "-" | "~" ) unary  
+unary&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-> ( "!" | "-" | "~" | "++" | "--" )? unary ( "++" | "--" )?  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| primary ;
 
 primary&nbsp;&nbsp;&nbsp;&nbsp;-> NUMBER | STRING | TRUE | FALSE  
@@ -69,8 +69,8 @@ primary&nbsp;&nbsp;&nbsp;&nbsp;-> NUMBER | STRING | TRUE | FALSE
 - POW `a**b`
 - NEG `-a`
 - MOD `a % b`
-- INC `a++`
-- DEC `b--`
+- INC `a++` / `++a`
+- DEC `a--` / `--a`
 ### logical
 - LESS `a < b`
 - GREATER `a > b`
@@ -99,4 +99,4 @@ primary&nbsp;&nbsp;&nbsp;&nbsp;-> NUMBER | STRING | TRUE | FALSE
   Prints provided value. It will attempt to print values of any type, and throw an error if it can't.
 
 ## scoping
-scopes are declared with curly braces `{}`. single-line scopes can be declared with a newline, where the scope begins and ends on the following line.
+scopes are declared with curly braces `{}`. single-line scopes can be declared within a single line, or with a newline, where the scope begins and ends on the following line.
