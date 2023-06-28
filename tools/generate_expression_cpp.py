@@ -1,6 +1,6 @@
 import re
 
-type_names = ['TokenType', 'Token', 'const', 'std::any', '=', 'ShrExprPtr', 'std::vector<ShrExprPtr>']
+type_names = ['TokenType', 'Token', 'const', 'std::any', '=', 'ShrExprPtr', 'std::vector<ShrExprPtr>', 'bool']
 
 expr_type_pattern = re.compile(r'struct (?P<type>[A-Za-z0-9]+) : Expression, public std::enable_shared_from_this<[A-Za-z]+> {')
 expr_constructor_pattern = r'\((?P<args>[\w,\*;:<>_ ]+)\);'

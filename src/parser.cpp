@@ -43,7 +43,9 @@ Token Parser::peek() {
 }
 
 Token Parser::peek_next() {
-    return tokens[current + 1];
+    if (!is_at_end())
+        return tokens[current + 1];
+    return tokens[tokens.size() - 1];
 }
 
 bool Parser::is_at_end() {
@@ -59,6 +61,24 @@ bool Parser::match(T... types) {
 
     for (TokenType type : types_to_match) {
         if (peek().type == type) {
+            is_match = true;
+            break;
+        }
+    }
+    if (is_match && !is_at_end())
+        next();
+
+    return is_match;
+}
+
+template<std::same_as<TokenType>... T>
+bool Parser::match_next(T... types) {
+    bool is_match = false;
+    std::vector<TokenType> types_to_match;
+    (types_to_match.emplace_back(types), ...);
+
+    for (TokenType type : types_to_match) {
+        if (peek_next().type == type) {
             is_match = true;
             break;
         }
@@ -116,7 +136,7 @@ ShrExprPtr Parser::handle_ternary() {
         TokenType type = previous().type == T_IF ? TERN : previous().type; // in case somehow another ternary operator is added to the lang
         ShrExprPtr l_expression = handle_equality();
         consume(T_ELSE, "Expected ':' after expression.");
-        ShrExprPtr r_expression = handle_expression();
+        ShrExprPtr r_expression = handle_ternary();
         expression = std::make_shared<TernaryExpression>(type, expression, l_expression, r_expression);
     }
     return expression;
@@ -125,7 +145,7 @@ ShrExprPtr Parser::handle_ternary() {
 ShrExprPtr Parser::handle_equality() {
     ShrExprPtr expression = handle_comparison();
 
-    while (match(EQ, NOT_EQ)) {
+    if (match(EQ, NOT_EQ)) {
         TokenType type = previous().type;
         ShrExprPtr r_expression = handle_comparison();
         expression = std::make_shared<BinaryExpression>(type, expression, r_expression);
@@ -134,12 +154,23 @@ ShrExprPtr Parser::handle_equality() {
 }
 
 ShrExprPtr Parser::handle_comparison() {
+    ShrExprPtr expression = handle_bitwise();
+
+    if (match(GREATER, GREATER_EQ, LESS, LESS_EQ)) {
+        TokenType type = previous().type;
+        ShrExprPtr r_expression = handle_bitwise();
+        expression = std::make_shared<BinaryExpression>(type, expression, r_expression);
+    }
+    return expression;
+}
+
+ShrExprPtr Parser::handle_bitwise() {
     ShrExprPtr expression = handle_term();
 
-    while (match(GREATER, GREATER_EQ, LESS, LESS_EQ)) {
+    if (match(B_OR, B_AND, B_XOR, CHK, LSHFT, RSHFT)) {
         TokenType type = previous().type;
-        ShrExprPtr r_expression = handle_term();
-        expression = std::make_shared<BinaryExpression>(type, expression, r_expression);
+        ShrExprPtr r_expression = handle_bitwise();
+        expression = std::make_shared<BitwiseExpression>(type, expression, r_expression);
     }
     return expression;
 }
@@ -147,7 +178,7 @@ ShrExprPtr Parser::handle_comparison() {
 ShrExprPtr Parser::handle_term() {
     ShrExprPtr expression = handle_factor();
 
-    while (match(SUB, ADD)) {
+    if (match(SUB, ADD)) {
         TokenType type = previous().type;
         ShrExprPtr r_expression = handle_factor();
         expression = std::make_shared<BinaryExpression>(type, expression, r_expression);
@@ -158,7 +189,7 @@ ShrExprPtr Parser::handle_term() {
 ShrExprPtr Parser::handle_factor() {
     ShrExprPtr expression = handle_unary();
 
-    while (match(DIV, MUL)) {
+    if (match(DIV, MUL, INT_DIV, POW, MOD)) {
         TokenType type = previous().type;
         ShrExprPtr r_expression = handle_unary();
         expression = std::make_shared<BinaryExpression>(type, expression, r_expression);
@@ -171,10 +202,28 @@ ShrExprPtr Parser::handle_unary() {
     If it doesn't find one, then handle
     the expression of next highest precedence
     (primary expression) */
-    if (match(L_NOT, NEG)) {
+    if (match(L_NOT, B_NOT, NEG, INC, DEC)) {
         TokenType type = previous().type;
         ShrExprPtr expression = handle_unary();
-        return std::make_shared<UnaryExpression>(type, expression);
+        return std::make_shared<UnaryExpression>(type, expression, false);
+    }
+    // Don't allow chaining INC and DEC operators
+    if (match(INC, DEC)) {
+        TokenType type = previous().type;
+        ShrExprPtr expression = handle_primary();
+        return std::make_shared<UnaryExpression>(type, expression, false);
+    }
+    return handle_unary_postfix();
+}
+
+// idea to handle postfix operators like this stolen from https://github.com/svtm/jlox/
+ShrExprPtr Parser::handle_unary_postfix() {
+    if (match_next(INC, DEC)) {
+        TokenType type = peek().type;
+        current--;
+        ShrExprPtr expression = handle_primary();
+        next();
+        return std::make_shared<UnaryExpression>(type, expression, true);
     }
     return handle_primary();
 }

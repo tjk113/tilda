@@ -22,6 +22,8 @@ struct Parser {
     bool is_at_end();
     template<std::same_as<TokenType>... T>
     bool match(T... types);
+    template<std::same_as<TokenType>... T>
+    bool match_next(T... types);
     Token consume(TokenType type, std::string message);
     void throw_error(Token token, std::string message);
     void synchronize();
@@ -29,9 +31,11 @@ struct Parser {
     ShrExprPtr handle_expression();
     ShrExprPtr handle_ternary();
     ShrExprPtr handle_equality();
+    ShrExprPtr handle_bitwise();
     ShrExprPtr handle_comparison();
     ShrExprPtr handle_term();
     ShrExprPtr handle_factor();
     ShrExprPtr handle_unary();
+    ShrExprPtr handle_unary_postfix();
     ShrExprPtr handle_primary();
 };

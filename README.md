@@ -3,6 +3,27 @@ a (very wip) C-like general purpose programming language
 
 implementation informed by [Crafting Interpreters](https://craftinginterpreters.com/)
 
+## formal grammar
+<code>expression&nbsp;-> ternary ;
+
+ternary&nbsp;&nbsp;&nbsp;&nbsp;-> equality "?" equality ":" ( expression )* ;
+
+equality&nbsp;&nbsp;&nbsp;-> comparison ( ( "!=" | "==" ) ) comparison )* ;
+
+comparison -> bitwise ( ( ">" | ">=" | "<" | "<=" ) bitwise )* ;
+
+bitwise&nbsp;&nbsp;&nbsp;&nbsp;-> term ( ( "|" | "&" | "^" | "@" | "<<" | ">>" ) term )* ;
+
+term&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-> factor ( ( "-" | "+" ) factor )* ;
+
+factor&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-> unary ( ( "/" | "\*" ) unary )\* ;
+
+unary&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-> ( "!" | "-" | "~" ) unary  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| primary ;
+
+primary&nbsp;&nbsp;&nbsp;&nbsp;-> NUMBER | STRING | TRUE | FALSE  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| "(" expression ")" ;</code>
+
 ## keywords
 - `if`
 - `else`
@@ -36,8 +57,7 @@ implementation informed by [Crafting Interpreters](https://craftinginterpreters.
 ### language
 - ASSIGN `a = b`
 - CALL `a([b...])`
-- RANGE `a..b`  
-  Used in `for i in a..b` loops.
+- RANGE `a..b`
 - ACCESS `a.b`
 - DEREF `*a`
 ### mathematical
@@ -61,10 +81,8 @@ implementation informed by [Crafting Interpreters](https://craftinginterpreters.
 - OR `a || b`
 - AND `a && b`
 - XOR `a ^^ b`
-- NOT `!a`
-#### ternary
-- T_IF `?`
-- T_ELSE `:`  
+- NOT `!a`  
+- TERN `?:`  
   `a ? b : c`
 ### bitwise
 - OR  `a | b`
@@ -74,7 +92,7 @@ implementation informed by [Crafting Interpreters](https://craftinginterpreters.
 - LSHFT `a << b`
 - RSHFT `a >> b`
 - CHK `a@b`  
-  Returns `true` if the bit at the specified offset is set
+  Returns the bit at position `b` in `a` (0 = least significant bit)
 
 ## built-in functions
 - `print()` / `println()`  

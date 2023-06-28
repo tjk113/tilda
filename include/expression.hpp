@@ -59,8 +59,9 @@ struct Expression {
 struct UnaryExpression : Expression, public std::enable_shared_from_this<UnaryExpression> {
     TokenType type;
     ShrExprPtr operand;
+    bool postfix;
 
-    UnaryExpression(TokenType type, ShrExprPtr operand);
+    UnaryExpression(TokenType type, ShrExprPtr operand, bool postfix);
     std::any accept(ExpressionVisitor<std::any>& expression_visitor) override;
 };
 

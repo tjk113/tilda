@@ -10,8 +10,9 @@ enum TokenType {
     L_BRACKET, R_BRACKET, COMMA, ASSIGN,
     RANGE, ACCESS, COMMENT,
     // Keywords
-    IF, ELSE, WHILE, FOR, IN, GOTO, SWITCH,
-    RETURN, TRUE, FALSE, LET, CONST, STRUCT,
+    IF, ELSE, WHILE, FOR, BREAK, CONTINUE, 
+    IN, GOTO, SWITCH, RETURN, TRUE, FALSE,
+    LET, CONST, STRUCT,
     // Values
     IDENTIFIER, TYPE, STR, NUM,
     // Math Operators
@@ -25,7 +26,7 @@ enum TokenType {
     // Bitwise Operators
     B_OR, B_AND, B_XOR, B_NOT,
     LSHFT, RSHFT, CHK,
-    // Intrinsic Functions
+    // Built-in Functions
     PRINT, PRINTLN,
     // End-of-file
     END_TOKEN

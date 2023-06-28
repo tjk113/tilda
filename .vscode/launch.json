@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceRoot}/bin/tilda.exe",
-            // "args": ["${workspaceRoot}/demos/demo.tilda"],
+            // "args": ["${workspaceRoot}/demos/unary.tilda"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],

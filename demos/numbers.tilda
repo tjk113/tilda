@@ -1,0 +1,4 @@
+u8 num = 255
+f32 float = 255.0
+u8 hex = 0xFF
+u8 bin = 0b11111111

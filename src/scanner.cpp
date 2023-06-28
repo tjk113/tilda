@@ -14,7 +14,8 @@ Scanner::Scanner(std::string src) {
 /* Advance the loop by getting the next
 character in the source code */
 char Scanner::next() {
-    current++;
+    if (!is_at_end())
+        current++;
     return src.at(current - 1);
 }
 
@@ -56,6 +57,7 @@ void Scanner::handle_string() {
 }
 
 void Scanner::handle_number() {
+    bool is_binary = false;
     while (isdigit(peek()) && !is_at_end())
         next();
 
@@ -66,22 +68,38 @@ void Scanner::handle_number() {
         while (isdigit(peek()) && !is_at_end())
             next();
     }
+    // Look for 'x' denoter
+    else if (peek() == 'x' && isalnum(peek_next())) {
+        // Consume!
+        next();
+        while (isalnum(peek()) && !is_at_end())
+            next();
+    }
+    // Look for 'b' denoter
+    else if (peek() == 'b' && isdigit(peek_next())) {
+        is_binary = true;
+        // Consume!
+        next();
+        while (isdigit(peek()) && !is_at_end())
+            next();
+    }
     if (!is_at_end())
         current--;
-
-    std::string t = src.substr(start, current - start);
+    
     // TODO: should all numbers be initially considered doubles?
-    add_token(NUM, std::stod(src.substr(start, current - start)));
+    double literal = is_binary ? (double)std::stoi(src.substr(start + 2, current - start - 2), nullptr, 2)
+        : std::stod(src.substr(start, current - start));
+    add_token(NUM, literal);
 }
 
 // TODO: unicode support
 void Scanner::handle_identifier_or_type() {
-    while ((isalnum(peek()) || peek() == '_') && !is_at_end())
+    int len = src.length();
+    while ((isalnum(peek()) || peek() == '_'))
         next();
     /* So that we aren't capturing the extra
     character that the final next() call picks up */
-    if (!is_at_end())
-        current--;
+    current--;
 
     std::string lexeme = src.substr(start, current - start);
     TokenType type;
@@ -97,7 +115,7 @@ void Scanner::handle_identifier_or_type() {
         if (type != TYPE)
             type = IDENTIFIER;
     }
-
+    
     add_token(type);
 }
 
@@ -105,17 +123,19 @@ void Scanner::handle_two_char_operator(TokenType type, char next_char) {
     while (peek() == next_char && !is_at_end()) {
         next();
     }
-    current--;
+    if (!is_at_end())
+        current--;
     add_token(type);
 }
 
 void Scanner::add_token(TokenType type) {
-    add_token(type, NULL);
+    add_token(type, std::any()); // NULL std::any value
 }
 
 void Scanner::add_token(TokenType type, std::any literal) {
     std::string lexeme = src.substr(start, current - start);
-    std::any value = literal.has_value() ? lexeme : literal;
+    bool a = literal.has_value();
+    std::any value = literal.has_value() ? literal : lexeme;
     tokens.emplace_back(Token(type, lexeme, value, line));
 }
 
@@ -130,9 +150,9 @@ void Scanner::scan_token() {
         case ']': add_token(R_BRACKET); break;
         case '"': handle_string(); break;
         case ',': add_token(COMMA); break;
-        case '+': peek_next() == '+' ? handle_two_char_operator(INC, '+') : add_token(ADD); break;
-        case '-': peek_next() == '-' ? handle_two_char_operator(DEC, '-') : isdigit(peek()) ? add_token(NEG) : add_token(SUB); break;
-        case '*': peek_next() == '*' ? handle_two_char_operator(POW, '*') : add_token(MUL); break;
+        case '+': peek() == '+' ? handle_two_char_operator(INC, '+') : add_token(ADD); break;
+        case '-': peek() == '-' ? handle_two_char_operator(DEC, '-') : isdigit(peek()) ? add_token(NEG) : add_token(SUB); break;
+        case '*': peek() == '*' ? handle_two_char_operator(POW, '*') : add_token(MUL); break;
         case '/':
             if (peek_next() == '/') {
                 while (peek() != '\n' && !is_at_end())
@@ -147,7 +167,7 @@ void Scanner::scan_token() {
         /* TODO: should "\" really be the
         integer division operator? */
         case '\\': add_token(INT_DIV); break;
-        case '.': peek_next() == '.' ? handle_two_char_operator(RANGE, '.') : add_token(ACCESS); break;
+        case '.': peek() == '.' ? handle_two_char_operator(RANGE, '.') : add_token(ACCESS); break;
         case '=': peek_next() == '=' ? handle_two_char_operator(EQ, '=') : add_token(ASSIGN); break;
         case '<': peek_next() == '=' ? handle_two_char_operator(LESS_EQ, '=') : peek_next() == '<' ? handle_two_char_operator(LSHFT, '<') : add_token(LESS); break;
         case '>': peek_next() == '=' ? handle_two_char_operator(GREATER_EQ, '=') : peek_next() == '>' ? handle_two_char_operator(RSHFT, '>') : add_token(GREATER); break;

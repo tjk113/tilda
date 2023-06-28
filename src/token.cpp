@@ -60,7 +60,7 @@ std::map<TokenType, std::string> Token::token_type_names = {
     {L_AND, "L_AND"},
     {L_XOR, "L_XOR"},
     {L_NOT, "L_NOT"},
-    // Ternary Logical Operators,
+    // Ternary Logical Operators
     {TERN, "TERN"},
     {T_IF, "T_IF"},
     {T_ELSE, "T_ELSE"},
@@ -72,6 +72,9 @@ std::map<TokenType, std::string> Token::token_type_names = {
     {LSHFT, "LSHFT"},
     {RSHFT, "RSHFT"},
     {CHK, "CHK"},
+    // Built-in Functions
+    {PRINT, "PRINT"},
+    {PRINTLN, "PRINTLN"},
     // End-of-file
     {END_TOKEN, "EOF"}
 };

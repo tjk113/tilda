@@ -1,8 +1,8 @@
 #include "expression.hpp"
 #include <any>
 
-UnaryExpression::UnaryExpression(TokenType type, ShrExprPtr operand) :
-    type(type), operand(operand) {}
+UnaryExpression::UnaryExpression(TokenType type, ShrExprPtr operand, bool postfix) :
+    type(type), operand(operand), postfix(postfix) {}
 
 std::any UnaryExpression::accept(ExpressionVisitor<std::any>& visitor) {
     return visitor.visit_unary_expression(shared_from_this());

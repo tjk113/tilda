@@ -46,7 +46,7 @@ void AST::test() {
             std::make_shared<UnaryExpression>(
                 NEG, std::make_shared<LiteralExpression>(
                     NUM, 5
-                )
+                ), false
             )
         )
     );
@@ -56,7 +56,9 @@ void AST::test() {
 }
 
 std::any AST::visit_unary_expression(ShrUnaryExprPtr expression) {
-    return parenthesize(Token::token_type_names[expression->type], expression->operand);
+    ShrLiteralExprPtr pre_or_postfix = std::make_shared<LiteralExpression>(
+        STR, std::string(expression->postfix ? "POST" : "PRE"));
+    return parenthesize(Token::token_type_names[expression->type], pre_or_postfix, expression->operand);
 }
 
 std::any AST::visit_binary_expression(ShrBinaryExprPtr expression) {
@@ -69,6 +71,7 @@ std::any AST::visit_ternary_expression(ShrTernaryExprPtr expression) {
 
 std::any AST::visit_literal_expression(ShrLiteralExprPtr expression) {
     auto value = expression->value;
+    auto type = expression->type;
     switch (expression->type) {
         case STR:
         case TYPE:
@@ -77,12 +80,16 @@ std::any AST::visit_literal_expression(ShrLiteralExprPtr expression) {
         /* TODO: for different internal number representations,
         more cases will have to be added to this switch block */
         case NUM:
+            // never actually the case atm, bc all nums are lexed as doubles
             try {
                 return std::to_string(std::any_cast<int>(expression->value));
             }
             catch (std::bad_any_cast) {
                 return std::to_string(std::any_cast<double>(expression->value));
             }
+        case TRUE:
+        case FALSE:
+            return std::string(std::any_cast<bool>(expression->value) ? "TRUE" : "FALSE");
         default:
             return std::string("unknown literal type");
     }

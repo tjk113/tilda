@@ -1,6 +1,1 @@
-// comment
-i16 angle=0
 angle++
-if angle==1
-    print()
-f64 arc=3/2
