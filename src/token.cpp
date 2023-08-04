@@ -25,7 +25,6 @@ std::map<TokenType, std::string> Token::token_type_names = {
     {WHILE, "WHILE"},
     {FOR, "FOR"},
     {IN, "IN"},
-    {GOTO, "GOTO"},
     {SWITCH, "SWITCH"},
     {RETURN, "RETURN"},
     {TRUE, "TRUE"},

@@ -4,14 +4,16 @@
 #include <map>
 #include <any>
 
+#include "types.hpp"
+
 enum TokenType {
     // Syntax
     L_PAREN, R_PAREN, L_BRACE, R_BRACE,
     L_BRACKET, R_BRACKET, COMMA, ASSIGN,
-    RANGE, ACCESS, COMMENT,
+    RANGE, ACCESS, DEREF_ACESS, DEREF, COMMENT,
     // Keywords
     IF, ELSE, WHILE, FOR, BREAK, CONTINUE, 
-    IN, GOTO, SWITCH, RETURN, TRUE, FALSE,
+    IN, SWITCH, RETURN, TRUE, FALSE,
     LET, CONST, STRUCT,
     // Values
     IDENTIFIER, TYPE, STR, NUM,
@@ -34,8 +36,11 @@ enum TokenType {
 
 struct Token {
     TokenType type;
-    std::string lexeme;
+    LiteralType literal_type;
+    // bool is_pointer;
+    // bool is_reference;
     std::any literal;
+    std::string lexeme;
     int line;
 
     Token() = default;

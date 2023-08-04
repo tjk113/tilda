@@ -1,14 +1,14 @@
 // Recursion!
 int operate(int n) {
-    if (n > 0)
+    if n > 0
         return operate(n - 1)
     else
         return 0
 }
 
 for i in 0..10 {
-    f64 t = time()
+    const t = time()
     operate(i)
-    f64 t2 = time()
+    let t2 = time()
     print(t2 - t1)
 }

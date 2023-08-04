@@ -4,25 +4,30 @@ a (very wip) C-like general purpose programming language
 implementation informed by [Crafting Interpreters](https://craftinginterpreters.com/)
 
 ## formal grammar
-<code>expression&nbsp;-> ternary ;
+```
+expression  -> declaration ;
 
-ternary&nbsp;&nbsp;&nbsp;&nbsp;-> equality "?" equality ":" ( expression )* ;
+declaration -> ( "let" | "const" ) IDENTIFIER "=" ternary ;
+             | "const"? TYPE IDENTIFIER "=" ternary ;
 
-equality&nbsp;&nbsp;&nbsp;-> comparison ( ( "!=" | "==" ) ) comparison )* ;
+ternary     -> equality "?" equality ":" ( expression )* ;
 
-comparison -> bitwise ( ( ">" | ">=" | "<" | "<=" ) bitwise )* ;
+equality    -> comparison ( ( "!=" | "==" ) ) comparison )* ;
 
-bitwise&nbsp;&nbsp;&nbsp;&nbsp;-> term ( ( "|" | "&" | "^" | "@" | "<<" | ">>" ) ( term | bitwise ) )* ;
+comparison  -> bitwise ( ( ">" | ">=" | "<" | "<=" ) bitwise )* ;
 
-term&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-> factor ( ( "-" | "+" ) factor )* ;
+bitwise     -> term ( ( "|" | "&" | "^" | "@" | "<<" | ">>" ) ( term | bitwise ) )* ;
 
-factor&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-> unary ( ( "/" | "\*" | "\\" | "**" | "%" ) unary )\* ;
+term        -> factor ( ( "-" | "+" ) factor )* ;
 
-unary&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-> ( "!" | "-" | "~" | "++" | "--" )? unary ( "++" | "--" )?  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| primary ;
+factor      -> unary ( ( "/" | "\*" | "\\" | "**" | "%" ) unary )* ;
 
-primary&nbsp;&nbsp;&nbsp;&nbsp;-> NUMBER | STRING | TRUE | FALSE  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| "(" expression ")" ;</code>
+unary       -> ( "!" | "-" | "~" | "++" | "--" )? unary ( "++" | "--" )?  
+             | primary ;
+
+primary     -> NUMBER | STRING | TRUE | FALSE  
+             | "(" expression ")" ;
+```
 
 ## keywords
 - `if`
@@ -32,7 +37,6 @@ primary&nbsp;&nbsp;&nbsp;&nbsp;-> NUMBER | STRING | TRUE | FALSE
 - `break`
 - `continue`
 - `in`
-- `goto`
 - `switch`
 - `return`
 - `true`
@@ -59,6 +63,7 @@ primary&nbsp;&nbsp;&nbsp;&nbsp;-> NUMBER | STRING | TRUE | FALSE
 - CALL `a([b...])`
 - RANGE `a..b`
 - ACCESS `a.b`
+- DEREF_ACCESS `a->b`
 - DEREF `*a`
 ### mathematical
 - ADD `a + b`
@@ -94,9 +99,17 @@ primary&nbsp;&nbsp;&nbsp;&nbsp;-> NUMBER | STRING | TRUE | FALSE
 - CHK `a@b`  
   Returns the bit at position `b` in `a` (0 = least significant bit)
 
+## number representations
+- Decimal `1`
+- Floating Point `1.0`
+- Binary `0b00000001`
+- Hexadecimal `0x01`
+
 ## built-in functions
 - `print()` / `println()`  
   Prints provided value. It will attempt to print values of any type, and throw an error if it can't.
+- `hex()` / `bin()`  
+  Returns a string containing the respective hexadecimal or binary representation of the provided number.
 
 ## scoping
 scopes are declared with curly braces `{}`. single-line scopes can be declared within a single line, or with a newline, where the scope begins and ends on the following line.

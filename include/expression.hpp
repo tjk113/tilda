@@ -99,6 +99,16 @@ struct GroupExpression : Expression, public std::enable_shared_from_this<GroupEx
     std::any accept(ExpressionVisitor<std::any>& expression_visitor) override;
 };
 
+struct DeclareExpression : Expression, public std::enable_shared_from_this<DeclareExpression> {
+    LiteralType type_specifier;
+    Token identifier;
+    bool is_const;
+    ShrExprPtr expression;
+
+    DeclareExpression(LiteralType type_specifier, Token identifier, bool is_const, ShrExprPtr expression);
+    std::any accept(ExpressionVisitor<std::any>& expression_visitor) override;
+}
+
 struct AssignExpression : Expression, public std::enable_shared_from_this<AssignExpression> {
     Token identifier;
     ShrExprPtr expression;

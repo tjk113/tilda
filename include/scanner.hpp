@@ -22,7 +22,6 @@ class Scanner {
         {"while", WHILE},
         {"for", FOR},
         {"in", IN},
-        {"goto", GOTO},
         {"switch", SWITCH},
         {"return", RETURN},
         {"true", TRUE},
@@ -38,7 +37,7 @@ class Scanner {
         "u32", "i32", "int", "u64",
         "i64", "f32", "f64", "str",
         "void", "bool"
-    };  
+    };
 
 public:
     Scanner(std::string src);

@@ -5,12 +5,12 @@ B = bin/
 
 FLAGS = -Iinclude/ -std=c++20
 
-OBJ_FILES = $(B)main.o $(B)expression.o $(B)scanner.o $(B)statement.o $(B)token.o $(B)ast.o $(B)parser.o $(B)error.o
+OBJ_FILES = $(B)main.o $(B)expression.o $(B)scanner.o $(B)statement.o $(B)token.o $(B)ast.o $(B)parser.o $(B)error.o $(B)interpreter.o
 
 $(B)tilda.exe: $(OBJ_FILES)
 	$(CC) $^ -o $@ $(FLAGS)
 
-$(B)main.o: $(S)main.cpp $(I)scanner.hpp $(I)token.hpp $(I)ast.hpp $(I)expression.hpp $(I)parser.hpp $(I)tilda.hpp
+$(B)main.o: $(S)main.cpp $(I)scanner.hpp $(I)token.hpp $(I)ast.hpp $(I)expression.hpp $(I)parser.hpp $(I)tilda.hpp $(I)interpreter.hpp
 	mkdir -p $(B)
 	$(CC) -c $< -o $@ $(FLAGS)
 
@@ -36,6 +36,9 @@ $(B)error.o: $(S)error.cpp $(I)error.hpp $(I)tilda.hpp
 	$(CC) -c $< -o $@ $(FLAGS)
 
 $(B)tilda.o: $(S)tilda.cpp $(I)tilda.hpp
+	$(CC) -c $< -o $@ $(FLAGS)
+
+$(B)interpreter.o : $(S)interpreter.cpp $(I)interpreter.hpp $(I)expression.hpp
 	$(CC) -c $< -o $@ $(FLAGS)
 
 exe: $(B)tilda.exe

@@ -54,5 +54,6 @@
         "typeinfo": "cpp",
         "variant": "cpp",
         "strstream": "cpp"
-    }
+    },
+    "C_Cpp.errorSquiggles": "disabled"
 }

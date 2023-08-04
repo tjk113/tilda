@@ -1,6 +1,8 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <cxxabi.h>
+#include <cstdlib>
 
 #include "expression.hpp"
 #include "common.hpp"
@@ -8,6 +10,9 @@
 #include "tilda.hpp"
 #include "token.hpp"
 #include "error.hpp"
+
+// TODO: where does type assignment to identifiers happen?
+// it should probably happen before we're parsing...
 
 Parser::Parser(std::vector<Token> tokens) :
     tokens(tokens) {}
@@ -167,7 +172,7 @@ ShrExprPtr Parser::handle_comparison() {
 ShrExprPtr Parser::handle_bitwise() {
     ShrExprPtr expression = handle_term();
 
-    if (match(B_OR, B_AND, B_XOR, CHK, LSHFT, RSHFT)) {
+    if (match(TokenType::B_OR, B_AND, B_XOR, CHK, LSHFT, RSHFT)) {
         TokenType type = previous().type;
         ShrExprPtr r_expression = handle_bitwise();
         expression = std::make_shared<BitwiseExpression>(type, expression, r_expression);
@@ -238,8 +243,9 @@ ShrExprPtr Parser::handle_primary() {
             consume(R_PAREN, "Expected ')' after expression.");
             expression = grouped_expression;
         }
-        else
+        else {
             expression = std::make_shared<LiteralExpression>(type, previous().literal);
+        }
     }
     else {
         throw_error(peek(), "Expected expression.");

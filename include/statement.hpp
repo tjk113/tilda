@@ -28,10 +28,6 @@ struct InStatement : Statement {
 
 };
 
-struct GotoStatement : Statement {
-
-};
-
 struct SwitchStatement : Statement {
 
 };

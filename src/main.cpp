@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -5,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include "interpreter.hpp"
 #include "expression.hpp"
 #include "scanner.hpp"
 #include "parser.hpp"
@@ -28,13 +30,17 @@ void from_file(std::string path) {
     } 
     else {
         std::cout << "Input file could not be read" << std::endl;
+        return;
     }
 
     Scanner scanner(src);
     Parser parser(scanner.tokens);
     ShrExprPtr expression = parser.parse();
-    AST ast;
-    std::cout << ast.print(expression) << std::endl;
+    // AST ast;
+    // std::cout << ast.print(expression) << std::endl;
+    Interpreter interpreter;
+    std::any res = expression->accept(interpreter);
+    // std::cout << std::any_cast<int64_t>(res) << std::endl;
     // print_token_values(scanner.tokens);
 }
 
@@ -53,8 +59,10 @@ void from_repl() {
         Scanner scanner(line);
         Parser parser(scanner.tokens);
         ShrExprPtr expression = parser.parse();
-        AST ast;
-        std::cout << ast.print(expression) << std::endl;
+        // AST ast;
+        // std::cout << ast.print(expression) << std::endl;
+        Interpreter interpreter;
+        expression->accept(interpreter);
         // print_token_values(scanner.tokens);
     }
 }

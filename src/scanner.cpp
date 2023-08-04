@@ -1,4 +1,6 @@
+#include <stdint.h>
 #include <iostream>
+#include <variant>
 #include <format>
 #include <string>
 #include <any>
@@ -28,7 +30,7 @@ char Scanner::peek() {
 /* Observes the next character without
 advancing the character pointer */
 char Scanner::peek_next() {
-    if (current + 1 >= src.length())
+    if (is_at_end())
         return '\0';
     return src.at(current);
 }
@@ -52,27 +54,28 @@ void Scanner::handle_string() {
     }
 
     // Literal should cut off quotes
-    std::string value = src.substr(start + 1, current - start - 2);
-    add_token(STR, value);
+    std::string literal = src.substr(start + 1, current - start - 2);
+    add_token(STR, literal);
 }
 
 void Scanner::handle_number() {
-    bool is_binary = false;
+    bool is_binary = false, is_float = false;
     while (isdigit(peek()) && !is_at_end())
         next();
 
     // Look for floating point
     if (peek() == '.' && isdigit(peek_next())) {
+        is_float = true;
         // Just consume that '.'
         next();
-        while (isdigit(peek()) && !is_at_end())
+        while (isdigit(peek_next()) && !is_at_end())
             next();
     }
     // Look for 'x' denoter
     else if (peek() == 'x' && isalnum(peek_next())) {
         // Consume!
         next();
-        while (isalnum(peek()) && !is_at_end())
+        while (isalnum(peek_next()) && !is_at_end())
             next();
     }
     // Look for 'b' denoter
@@ -80,26 +83,26 @@ void Scanner::handle_number() {
         is_binary = true;
         // Consume!
         next();
-        while (isdigit(peek()) && !is_at_end())
+        while (isdigit(peek_next()) && !is_at_end())
             next();
     }
-    if (!is_at_end())
+    else
         current--;
     
-    // TODO: should all numbers be initially considered doubles?
-    double literal = is_binary ? (double)std::stoi(src.substr(start + 2, current - start - 2), nullptr, 2)
-        : std::stod(src.substr(start, current - start));
-    add_token(NUM, literal);
+    std::variant<int64_t, double> literal;
+    if (is_float)
+        literal = std::stod(src.substr(start, current - start));
+    else if (is_binary)
+        literal = std::stoll(src.substr(start + 2, current - start - 2), nullptr, 2);
+    else
+        literal = std::stoll(src.substr(start, current - start));
+    add_token(NUM, is_float ? std::any(std::get<double>(literal)) : std::any(std::get<int64_t>(literal)));
 }
 
 // TODO: unicode support
 void Scanner::handle_identifier_or_type() {
-    int len = src.length();
-    while ((isalnum(peek()) || peek() == '_'))
+    while ((isalnum(peek_next()) || peek_next() == '_') && !is_at_end())
         next();
-    /* So that we aren't capturing the extra
-    character that the final next() call picks up */
-    current--;
 
     std::string lexeme = src.substr(start, current - start);
     TokenType type;
@@ -115,16 +118,18 @@ void Scanner::handle_identifier_or_type() {
         if (type != TYPE)
             type = IDENTIFIER;
     }
-    
-    add_token(type);
+    // bool handling (is this sloppy?)
+    if (type == TRUE)
+        add_token(type, true);
+    else if (type == FALSE)
+        add_token(type, false);
+    else
+        add_token(type);
 }
 
 void Scanner::handle_two_char_operator(TokenType type, char next_char) {
-    while (peek() == next_char && !is_at_end()) {
+    while (peek_next() == next_char && !is_at_end())
         next();
-    }
-    if (!is_at_end())
-        current--;
     add_token(type);
 }
 
@@ -134,7 +139,6 @@ void Scanner::add_token(TokenType type) {
 
 void Scanner::add_token(TokenType type, std::any literal) {
     std::string lexeme = src.substr(start, current - start);
-    bool a = literal.has_value();
     std::any value = literal.has_value() ? literal : lexeme;
     tokens.emplace_back(Token(type, lexeme, value, line));
 }
@@ -150,9 +154,11 @@ void Scanner::scan_token() {
         case ']': add_token(R_BRACKET); break;
         case '"': handle_string(); break;
         case ',': add_token(COMMA); break;
-        case '+': peek() == '+' ? handle_two_char_operator(INC, '+') : add_token(ADD); break;
-        case '-': peek() == '-' ? handle_two_char_operator(DEC, '-') : isdigit(peek()) ? add_token(NEG) : add_token(SUB); break;
-        case '*': peek() == '*' ? handle_two_char_operator(POW, '*') : add_token(MUL); break;
+        case '+': peek_next() == '+' ? handle_two_char_operator(INC, '+') : add_token(ADD); break;
+        // TODO: how to handle whitespace between a negation operator and its operand?
+        case '-': peek_next() == '-' ? handle_two_char_operator(DEC, '-') :
+            (isalnum(peek_next()) || peek_next() == '(') ? add_token(NEG) : add_token(SUB); break;
+        case '*': peek_next() == '*' ? handle_two_char_operator(POW, '*') : add_token(MUL); break;
         case '/':
             if (peek_next() == '/') {
                 while (peek() != '\n' && !is_at_end())
@@ -167,12 +173,12 @@ void Scanner::scan_token() {
         /* TODO: should "\" really be the
         integer division operator? */
         case '\\': add_token(INT_DIV); break;
-        case '.': peek() == '.' ? handle_two_char_operator(RANGE, '.') : add_token(ACCESS); break;
+        case '.': peek_next() == '.' ? handle_two_char_operator(RANGE, '.') : add_token(ACCESS); break;
         case '=': peek_next() == '=' ? handle_two_char_operator(EQ, '=') : add_token(ASSIGN); break;
         case '<': peek_next() == '=' ? handle_two_char_operator(LESS_EQ, '=') : peek_next() == '<' ? handle_two_char_operator(LSHFT, '<') : add_token(LESS); break;
         case '>': peek_next() == '=' ? handle_two_char_operator(GREATER_EQ, '=') : peek_next() == '>' ? handle_two_char_operator(RSHFT, '>') : add_token(GREATER); break;
         case '!': peek_next() == '=' ? handle_two_char_operator(NOT_EQ, '=') : add_token(L_NOT); break;
-        case '|': peek_next() == '|' ? handle_two_char_operator(L_OR, '|') : add_token(B_OR); break;
+        case '|': peek_next() == '|' ? handle_two_char_operator(L_OR, '|') : add_token(TokenType::B_OR); break;
         case '&': peek_next() == '&' ? handle_two_char_operator(L_AND, '&') : add_token(B_AND); break;
         case '^': peek_next() == '^' ? handle_two_char_operator(L_XOR, '^') : add_token(B_XOR); break;
         case '?': add_token(T_IF); break;
