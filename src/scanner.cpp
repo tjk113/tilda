@@ -59,9 +59,11 @@ void Scanner::handle_string() {
 }
 
 void Scanner::handle_number() {
-    bool is_binary = false, is_float = false;
-    while (isdigit(peek()) && !is_at_end())
+    bool is_hex = false, is_binary = false, is_float = false;
+    do {
         next();
+    } while (isdigit(peek()) && !is_at_end());
+        // next();
 
     // Look for floating point
     if (peek() == '.' && isdigit(peek_next())) {
@@ -73,6 +75,7 @@ void Scanner::handle_number() {
     }
     // Look for 'x' denoter
     else if (peek() == 'x' && isalnum(peek_next())) {
+        is_hex = true;
         // Consume!
         next();
         while (isalnum(peek_next()) && !is_at_end())
@@ -86,12 +89,15 @@ void Scanner::handle_number() {
         while (isdigit(peek_next()) && !is_at_end())
             next();
     }
-    else
+
+    if (!is_float && !is_hex && !is_binary)
         current--;
-    
+
     std::variant<int64_t, double> literal;
     if (is_float)
         literal = std::stod(src.substr(start, current - start));
+    else if (is_hex)
+        literal = std::stoll(src.substr(start + 2, current - start - 2), nullptr, 16);
     else if (is_binary)
         literal = std::stoll(src.substr(start + 2, current - start - 2), nullptr, 2);
     else
@@ -115,8 +121,15 @@ void Scanner::handle_identifier_or_type() {
             if (lexeme == data_type)
                 type = TYPE;
         }
-        if (type != TYPE)
-            type = IDENTIFIER;
+        if (type != TYPE) {
+            // TODO: remove
+            if (lexeme == "print")
+                type = PRINT;
+            else if (lexeme == "type")
+                type = TYPEOF;
+            else
+                type = IDENTIFIER;
+        }
     }
     // bool handling (is this sloppy?)
     if (type == TRUE)
@@ -181,15 +194,15 @@ void Scanner::scan_token() {
         case '|': peek_next() == '|' ? handle_two_char_operator(L_OR, '|') : add_token(TokenType::B_OR); break;
         case '&': peek_next() == '&' ? handle_two_char_operator(L_AND, '&') : add_token(B_AND); break;
         case '^': peek_next() == '^' ? handle_two_char_operator(L_XOR, '^') : add_token(B_XOR); break;
+        case '~': add_token(B_NOT); break;
         case '?': add_token(T_IF); break;
         case ':': add_token(T_ELSE); break;
-        case '~': add_token(B_NOT); break;
         case '@': add_token(CHK); break;
         // Ignore whitespace
         case ' ':
         case '\r':
         case '\t': break;
-        case '\n': line++; break;
+        case '\n': add_token(NEWLINE); line++; break;
         default:
             if (isdigit(c))
                 handle_number();

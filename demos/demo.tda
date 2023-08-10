@@ -7,11 +7,11 @@ struct Student {
 void fizzbuzz(int n) {
     for i in 0..n {
         if i % 3 == 0
-            println()
+            print()
         else if i % 5 == 0
-            println("buzz")
+            print("buzz")
         else
-            println(n)
+            print(n)
     }
 }
 

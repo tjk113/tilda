@@ -4,8 +4,9 @@
 
 #include "expression.hpp"
 
-struct TildaEnvironment {
-    std::vector<ShrExprPtr> expressions;
-    TildaEnvironment(std::vector<ShrExprPtr> expressions);
-    bool run();
+struct Tilda {
+    static bool had_error;
+    static bool had_runtime_error;
+
+    static bool run();
 };

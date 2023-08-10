@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceRoot}/bin/tilda.exe",
-            "args": ["${workspaceRoot}/demos/small.tda"],
+            "args": ["${workspaceRoot}/demos/scope.tda"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],
@@ -17,7 +17,7 @@
             "preLaunchTask": "Build (Debug)",
             "MIMode": "gdb",
             // make sure to change this to your own gdb path
-            "miDebuggerPath": "C:/msys64/mingw64/bin/gdb.exe",
+            "miDebuggerPath": "D:/MSYS2/mingw64/bin/gdb.exe",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",

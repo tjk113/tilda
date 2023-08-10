@@ -5,28 +5,47 @@ implementation informed by [Crafting Interpreters](https://craftinginterpreters.
 
 ## formal grammar
 ```
-expression  -> declaration ;
+program               -> declaration_statement* END_TOKEN ;
 
-declaration -> ( "let" | "const" ) IDENTIFIER "=" ternary ;
-             | "const"? TYPE IDENTIFIER "=" ternary ;
+declaration_statement -> variable_declaration
+                       | statement ;
 
-ternary     -> equality "?" equality ":" ( expression )* ;
+variable_declaration  -> "const"? TYPE IDENTIFIER ( "=" expression )?
+                       | ( "let" | "const" ) IDENTIFIER ( "=" expression )? ;
 
-equality    -> comparison ( ( "!=" | "==" ) ) comparison )* ;
+statement             -> expression_statement
+                       | print_statement
+                       | block ;
 
-comparison  -> bitwise ( ( ">" | ">=" | "<" | "<=" ) bitwise )* ;
+block                 -> "{" declaration_statement* "}" ;
 
-bitwise     -> term ( ( "|" | "&" | "^" | "@" | "<<" | ">>" ) ( term | bitwise ) )* ;
+print_statement       -> "print" expression ;
 
-term        -> factor ( ( "-" | "+" ) factor )* ;
+expression_statement  -> expression ;
 
-factor      -> unary ( ( "/" | "\*" | "\\" | "**" | "%" ) unary )* ;
+expression            -> assignment ;
 
-unary       -> ( "!" | "-" | "~" | "++" | "--" )? unary ( "++" | "--" )?  
-             | primary ;
+assignment            -> IDENTIFIER "=" assignment
+                       | equality ;
 
-primary     -> NUMBER | STRING | TRUE | FALSE  
-             | "(" expression ")" ;
+ternary               -> equality "?" equality ":" ( expression )* ;
+
+equality              -> comparison ( ( "!=" | "==" ) ) comparison )* ;
+
+comparison            -> bitwise ( ( ">" | ">=" | "<" | "<=" ) bitwise )* ;
+
+bitwise               -> term ( ( "|" | "&" | "^" | "@" | "<<" | ">>" ) ( term | bitwise ) )* ;
+
+term                  -> factor ( ( "-" | "+" ) factor )* ;
+
+factor                -> unary ( ( "/" | "\*" | "\\" | "**" | "%" ) unary )* ;
+
+unary                 -> ( "!" | "-" | "~" | "++" | "--" )? unary ( "++" | "--" )?  
+                       | primary ;
+
+primary               -> NUMBER | STRING | TRUE | FALSE
+                       | IDENTIFIER
+                       | "(" expression ")" ;
 ```
 
 ## keywords

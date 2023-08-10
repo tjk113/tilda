@@ -10,7 +10,8 @@ enum TokenType {
     // Syntax
     L_PAREN, R_PAREN, L_BRACE, R_BRACE,
     L_BRACKET, R_BRACKET, COMMA, ASSIGN,
-    RANGE, ACCESS, DEREF_ACESS, DEREF, COMMENT,
+    RANGE, ACCESS, DEREF_ACESS, DEREF, 
+    NEWLINE, COMMENT,
     // Keywords
     IF, ELSE, WHILE, FOR, BREAK, CONTINUE, 
     IN, SWITCH, RETURN, TRUE, FALSE,
@@ -29,7 +30,7 @@ enum TokenType {
     B_OR, B_AND, B_XOR, B_NOT,
     LSHFT, RSHFT, CHK,
     // Built-in Functions
-    PRINT, PRINTLN,
+    PRINT, TYPEOF,
     // End-of-file
     END_TOKEN
 };

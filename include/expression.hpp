@@ -15,6 +15,7 @@ struct BinaryExpression;
 struct TernaryExpression;
 struct LiteralExpression;
 struct GroupExpression;
+struct VariableExpression;
 struct AssignExpression;
 struct RangeExpression;
 struct AccessExpression;
@@ -28,6 +29,7 @@ typedef std::shared_ptr<BinaryExpression> ShrBinaryExprPtr;
 typedef std::shared_ptr<TernaryExpression> ShrTernaryExprPtr;
 typedef std::shared_ptr<LiteralExpression> ShrLiteralExprPtr;
 typedef std::shared_ptr<GroupExpression> ShrGroupExprPtr;
+typedef std::shared_ptr<VariableExpression> ShrVariableExprPtr;
 typedef std::shared_ptr<AssignExpression> ShrAssignExprPtr;
 typedef std::shared_ptr<RangeExpression> ShrRangeExprPtr;
 typedef std::shared_ptr<AccessExpression> ShrAccessExprPtr;
@@ -42,6 +44,7 @@ struct ExpressionVisitor {
     virtual T visit_ternary_expression(ShrTernaryExprPtr expression) = 0;
     virtual T visit_literal_expression(ShrLiteralExprPtr expression) = 0;
     virtual T visit_group_expression(ShrGroupExprPtr expression) = 0;
+    virtual T visit_variable_expression(ShrVariableExprPtr expression) = 0;
     virtual T visit_assign_expression(ShrAssignExprPtr expression) = 0;
     virtual T visit_range_expression(ShrRangeExprPtr expression) = 0;
     virtual T visit_access_expression(ShrAccessExprPtr expression) = 0;
@@ -99,15 +102,12 @@ struct GroupExpression : Expression, public std::enable_shared_from_this<GroupEx
     std::any accept(ExpressionVisitor<std::any>& expression_visitor) override;
 };
 
-struct DeclareExpression : Expression, public std::enable_shared_from_this<DeclareExpression> {
-    LiteralType type_specifier;
+struct VariableExpression : Expression, public std::enable_shared_from_this<VariableExpression> {
     Token identifier;
-    bool is_const;
-    ShrExprPtr expression;
 
-    DeclareExpression(LiteralType type_specifier, Token identifier, bool is_const, ShrExprPtr expression);
+    VariableExpression(Token identifier);
     std::any accept(ExpressionVisitor<std::any>& expression_visitor) override;
-}
+};
 
 struct AssignExpression : Expression, public std::enable_shared_from_this<AssignExpression> {
     Token identifier;

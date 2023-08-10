@@ -5,13 +5,12 @@ B = bin/
 
 FLAGS = -Iinclude/ -std=c++20
 
-OBJ_FILES = $(B)main.o $(B)expression.o $(B)scanner.o $(B)statement.o $(B)token.o $(B)ast.o $(B)parser.o $(B)error.o $(B)interpreter.o
+OBJ_FILES = $(B)main.o $(B)expression.o $(B)scanner.o $(B)statement.o $(B)token.o $(B)ast.o $(B)parser.o $(B)error.o $(B)interpreter.o $(B)tilda.o $(B)types.o $(B)environment.o
 
 $(B)tilda.exe: $(OBJ_FILES)
 	$(CC) $^ -o $@ $(FLAGS)
 
 $(B)main.o: $(S)main.cpp $(I)scanner.hpp $(I)token.hpp $(I)ast.hpp $(I)expression.hpp $(I)parser.hpp $(I)tilda.hpp $(I)interpreter.hpp
-	mkdir -p $(B)
 	$(CC) -c $< -o $@ $(FLAGS)
 
 $(B)expression.o: $(S)expression.cpp $(I)expression.hpp $(I)common.hpp $(I)token.hpp
@@ -20,7 +19,7 @@ $(B)expression.o: $(S)expression.cpp $(I)expression.hpp $(I)common.hpp $(I)token
 $(B)scanner.o: $(S)scanner.cpp $(I)scanner.hpp $(I)token.hpp
 	$(CC) -c $< -o $@ $(FLAGS)
 
-$(B)statement.o: $(S)statement.cpp $(I)statement.hpp
+$(B)statement.o: $(S)statement.cpp $(I)statement.hpp $(I)expression.hpp $(I)token.hpp $(I)environment.hpp
 	$(CC) -c $< -o $@ $(FLAGS)
 
 $(B)token.o: $(S)token.cpp $(I)token.hpp
@@ -38,7 +37,13 @@ $(B)error.o: $(S)error.cpp $(I)error.hpp $(I)tilda.hpp
 $(B)tilda.o: $(S)tilda.cpp $(I)tilda.hpp
 	$(CC) -c $< -o $@ $(FLAGS)
 
-$(B)interpreter.o : $(S)interpreter.cpp $(I)interpreter.hpp $(I)expression.hpp
+$(B)interpreter.o : $(S)interpreter.cpp $(I)interpreter.hpp $(I)expression.hpp $(I)token.hpp $(I)tilda.hpp $(I)environment.hpp
+	$(CC) -c $< -o $@ $(FLAGS)
+
+$(B)types.o : $(S)types.cpp $(I)types.hpp
+	$(CC) -c $< -o $@ $(FLAGS)
+
+$(B)environment.o : $(S)environment.cpp $(I)environment.hpp
 	$(CC) -c $< -o $@ $(FLAGS)
 
 exe: $(B)tilda.exe

@@ -1,13 +1,14 @@
 // Recursion!
 int operate(int n) {
-    if n > 0
-        return operate(n - 1)
-    else
-        return 0
+    return n > 0 ? operate(n - 1) : 0
 }
 
 for i in 0..10 {
     const t = time()
+    let num = 1
+    const num = 1
+    int num = 1
+    const int = 1
     operate(i)
     let t2 = time()
     print(t2 - t1)

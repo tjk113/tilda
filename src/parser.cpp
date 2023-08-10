@@ -1,12 +1,14 @@
 #include <iostream>
+#include <cstdlib>
+#include <format>
 #include <memory>
 #include <vector>
-#include <cxxabi.h>
-#include <cstdlib>
 
 #include "expression.hpp"
+#include "statement.hpp"
 #include "common.hpp"
 #include "parser.hpp"
+#include "types.hpp"
 #include "tilda.hpp"
 #include "token.hpp"
 #include "error.hpp"
@@ -17,20 +19,14 @@
 Parser::Parser(std::vector<Token> tokens) :
     tokens(tokens) {}
 
-void Parser::test() {
-    if (tokens.empty()) {
-        DEBUG("Parser::test: tokens is empty!");
-        return;
-    }
-    if (match(NUM, ADD, SUB))
-        DEBUG("congrats mark");
-}
-
-ShrExprPtr Parser::parse() {
-    ShrExprPtr expression = handle_expression();
-    if (Error::had_error)
-        return nullptr;
-    return expression;
+std::vector<ShrStmtPtr> Parser::parse() {
+    std::vector<ShrStmtPtr> statements;
+    // TODO: error handling
+    while (!is_at_end())
+        statements.push_back(handle_declaration());
+    // if (Error::had_error)
+    //     return nullptr;
+    return statements;
 }
 
 Token Parser::previous() {
@@ -51,6 +47,11 @@ Token Parser::peek_next() {
     if (!is_at_end())
         return tokens[current + 1];
     return tokens[tokens.size() - 1];
+}
+
+bool Parser::check(TokenType type) {
+    if (is_at_end()) return false;
+    return peek().type == type;
 }
 
 bool Parser::is_at_end() {
@@ -104,9 +105,8 @@ Token Parser::consume(TokenType type, std::string message) {
 void Parser::throw_error(Token token, std::string message) {
     if (token.type == END_TOKEN)
         Error::report(token.line, "at end", message);
-    else {
+    else
         Error::report(token.line, "at " + token.lexeme, message);
-    }
 }
 
 void Parser::synchronize() {
@@ -130,8 +130,93 @@ void Parser::synchronize() {
     next();
 }
 
+ShrStmtPtr Parser::handle_declaration() {
+    // TODO: error handling!!!
+    if (match(CONST, LET, TYPE))
+        return handle_variable();
+    return handle_statement();
+}
+
+ShrStmtPtr Parser::handle_variable() {
+    ShrExprPtr expression;
+    bool is_const = previous().type == CONST ? true : false;
+    LiteralType literal_type;
+
+    // TODO: type inference
+    if (previous().type == TYPE || match(TYPE))
+        literal_type = StringToLiteralType::map[previous().lexeme];
+    else if (previous().type == LET || match(LET))
+        ;
+
+    Token identifier = consume(IDENTIFIER, "Expected identifier.");
+
+    if (match(ASSIGN))
+        expression = handle_expression();
+    
+    consume(NEWLINE, "Expected newline after variable declaration.");
+
+    return std::make_shared<DeclareStatement>(identifier, literal_type, expression);
+}
+
+ShrStmtPtr Parser::handle_statement() {
+    if (match(PRINT)) return handle_print();
+    if (match(TYPEOF)) return handle_type();
+    if (match(L_BRACE)) return std::make_shared<BlockStatement>(handle_block());
+    return handle_expression_statement();
+}
+
+ShrStmtPtr Parser::handle_print() {
+    ShrExprPtr expression = handle_expression();
+    consume(NEWLINE, "Expected newline after value.");
+    return std::make_shared<PrintStatement>(expression);
+}
+
+ShrStmtPtr Parser::handle_type() {
+    ShrExprPtr expression = handle_expression();
+    consume(NEWLINE, "Expected newline after value.");
+    return std::make_shared<TypeStatement>(expression);
+}
+
+std::vector<ShrStmtPtr> Parser::handle_block() {
+    std::vector<ShrStmtPtr> statements;
+
+    match(NEWLINE);
+
+    while (!check(R_BRACE) && !is_at_end())
+        statements.push_back(handle_declaration());
+    consume(R_BRACE, "Expected \"}\" after block.");
+
+    match(NEWLINE);
+    
+    return statements;
+}
+
+ShrStmtPtr Parser::handle_expression_statement() {
+    ShrExprPtr expression = handle_expression();
+    consume(NEWLINE, "Expected newline after expression.");
+    return std::make_shared<ExpressionStatement>(expression);
+}
+
 ShrExprPtr Parser::handle_expression() {
-    return handle_ternary();
+    return handle_assignment();
+}
+
+ShrExprPtr Parser::handle_assignment() {
+    ShrExprPtr expression = handle_ternary();
+
+    if (match(ASSIGN)) {
+        Token target = previous();
+        ShrExprPtr value = handle_assignment();
+
+        if (VariableExpression* v = dynamic_cast<VariableExpression*>(expression.get())) {
+            Token identifier = v->identifier;
+            return std::make_shared<AssignExpression>(identifier, value);
+        }
+        // Report error
+        std::cout << std::format("Invalid assignment target: \"{}\"", target.lexeme);
+    }
+
+    return expression;
 }
 
 ShrExprPtr Parser::handle_ternary() {
@@ -235,7 +320,7 @@ ShrExprPtr Parser::handle_unary_postfix() {
 
 ShrExprPtr Parser::handle_primary() {
     ShrExprPtr expression;
-    if (match(IDENTIFIER, TYPE, NUM, STR, TRUE, FALSE, L_PAREN/*, NIL*/)) {
+    if (match(TYPE, NUM, STR, TRUE, FALSE, L_PAREN/*, NIL*/)) {
         TokenType type = previous().type;
         // Handle grouped expression
         if (type == L_PAREN) {
@@ -247,6 +332,8 @@ ShrExprPtr Parser::handle_primary() {
             expression = std::make_shared<LiteralExpression>(type, previous().literal);
         }
     }
+    else if (match(IDENTIFIER))
+        return std::make_shared<VariableExpression>(previous());
     else {
         throw_error(peek(), "Expected expression.");
         return nullptr;

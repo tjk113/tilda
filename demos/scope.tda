@@ -1,0 +1,6 @@
+const name = "thomas"
+{
+    let name = "jack"
+    print(name)
+}
+print(name)

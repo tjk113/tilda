@@ -8,11 +8,11 @@
 
 #include "interpreter.hpp"
 #include "expression.hpp"
+#include "statement.hpp"
 #include "scanner.hpp"
 #include "parser.hpp"
 #include "tilda.hpp"
 #include "token.hpp"
-#include "ast.hpp"
 
 void print_token_values(std::vector<Token> toks) {
     for (Token tok : toks)
@@ -25,45 +25,40 @@ void from_file(std::string path) {
 
     if (fstream) {
         std::ostringstream stringstream;
-        stringstream << fstream.rdbuf();
+        stringstream << fstream.rdbuf() << "\n";
         src = stringstream.str();
-    } 
+    }
     else {
         std::cout << "Input file could not be read" << std::endl;
         return;
     }
-
+    Interpreter interpreter;
     Scanner scanner(src);
     Parser parser(scanner.tokens);
-    ShrExprPtr expression = parser.parse();
-    // AST ast;
-    // std::cout << ast.print(expression) << std::endl;
-    Interpreter interpreter;
-    std::any res = expression->accept(interpreter);
-    // std::cout << std::any_cast<int64_t>(res) << std::endl;
-    // print_token_values(scanner.tokens);
+    std::vector<ShrStmtPtr> statements = parser.parse();
+    interpreter.interpret(statements);
 }
 
 void from_repl() {
     std::string line;
-    std::cout << "tilda | alpha v0.1" << std::endl;
+    std::cout << "tilda ~ alpha v0.1" << std::endl;
+
+    Interpreter interpreter;
 
     // Main loop
     while (std::cout << ">> " && std::getline(std::cin, line)) {
         if (line == "q")
             std::exit(0);
-        else if (line == "ast") {
-            AST::test();
+        // stdin consumes newline, so add it back
+        line += "\n";
+        // Handle empty line
+        if (line == "\n")
             continue;
-        }
+
         Scanner scanner(line);
         Parser parser(scanner.tokens);
-        ShrExprPtr expression = parser.parse();
-        // AST ast;
-        // std::cout << ast.print(expression) << std::endl;
-        Interpreter interpreter;
-        expression->accept(interpreter);
-        // print_token_values(scanner.tokens);
+        std::vector<ShrStmtPtr> statements = parser.parse();
+        interpreter.interpret(statements);
     }
 }
 

@@ -36,11 +36,11 @@ std::any GroupExpression::accept(ExpressionVisitor<std::any>& visitor) {
     return visitor.visit_group_expression(shared_from_this());
 }
 
-DeclareExpression::DeclareExpression(LiteralType type_specifier, Token identifier, bool is_const, ShrExprPtr expression) :
-    type_specifier(type_specifier), identifier(identifier), is_const(is_const), expression(expression) {}
+VariableExpression::VariableExpression(Token identifier) :
+    identifier(identifier) {}
 
-std::any DeclareExpression::accept(ExpressionVisitor<std::any>& visitor) {
-    return visitor.visit_declare_expression(shared_from_this());
+std::any VariableExpression::accept(ExpressionVisitor<std::any>& visitor) {
+    return visitor.visit_variable_expression(shared_from_this());
 }
 
 AssignExpression::AssignExpression(Token identifier, ShrExprPtr expression) :

@@ -1,8 +1,7 @@
 #include "tilda.hpp"
 
-TildaEnvironment::TildaEnvironment(std::vector<ShrExprPtr> expressions) :
-    expressions(expressions) {}
+bool Tilda::had_error, Tilda::had_runtime_error = false;
 
-bool TildaEnvironment::run() {
-    ;
+bool Tilda::run() {
+        
 }

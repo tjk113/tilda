@@ -26,34 +26,34 @@ std::string AST::parenthesize(std::string label, E... expressions) {
     return buf.str();
 }
 
-void AST::test() {
-    // literal strings must *always* be std::string, and not const char*!
-    ShrTernaryExprPtr ternary_expression = std::make_shared<TernaryExpression>
-    (TERN,
-        std::make_shared<LogicalExpression>(
-            EQ,
-            std::make_shared<LiteralExpression>(
-                STR, std::string("Jason")
-            ),
-            std::make_shared<LiteralExpression>(
-                STR, std::string("Mark")
-            )
-        ),
-        std::make_shared<LiteralExpression>(
-            NUM, 3
-        ),
-        std::make_shared<GroupExpression>(
-            std::make_shared<UnaryExpression>(
-                NEG, std::make_shared<LiteralExpression>(
-                    NUM, 5
-                ), false
-            )
-        )
-    );
+// void AST::test() {
+//     // literal strings must *always* be std::string, and not const char*!
+//     ShrTernaryExprPtr ternary_expression = std::make_shared<TernaryExpression>
+//     (TERN,
+//         std::make_shared<LogicalExpression>(
+//             EQ,
+//             std::make_shared<LiteralExpression>(
+//                 STR, std::string("Jason")
+//             ),
+//             std::make_shared<LiteralExpression>(
+//                 STR, std::string("Mark")
+//             )
+//         ),
+//         std::make_shared<LiteralExpression>(
+//             NUM, 3
+//         ),
+//         std::make_shared<GroupExpression>(
+//             std::make_shared<UnaryExpression>(
+//                 NEG, std::make_shared<LiteralExpression>(
+//                     NUM, 5
+//                 ), false
+//             )
+//         )
+//     );
 
-    AST ast;
-    std::cout << ast.print(ternary_expression) << std::endl;
-}
+//     AST ast;
+//     std::cout << ast.print(ternary_expression) << std::endl;
+// }
 
 std::any AST::visit_unary_expression(ShrUnaryExprPtr expression) {
     ShrLiteralExprPtr pre_or_postfix = std::make_shared<LiteralExpression>(
