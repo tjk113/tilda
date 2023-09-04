@@ -6,6 +6,7 @@
 #include <any>
 
 #include "scanner.hpp"
+#include "tilda.hpp"
 #include "token.hpp"
 
 Scanner::Scanner(std::string src) {
@@ -183,15 +184,12 @@ void Scanner::scan_token() {
                 add_token(DIV);
             break;
         case '%': add_token(MOD); break;
-        /* TODO: should "\" really be the
-        integer division operator? */
-        case '\\': add_token(INT_DIV); break;
         case '.': peek_next() == '.' ? handle_two_char_operator(RANGE, '.') : add_token(ACCESS); break;
         case '=': peek_next() == '=' ? handle_two_char_operator(EQ, '=') : add_token(ASSIGN); break;
         case '<': peek_next() == '=' ? handle_two_char_operator(LESS_EQ, '=') : peek_next() == '<' ? handle_two_char_operator(LSHFT, '<') : add_token(LESS); break;
         case '>': peek_next() == '=' ? handle_two_char_operator(GREATER_EQ, '=') : peek_next() == '>' ? handle_two_char_operator(RSHFT, '>') : add_token(GREATER); break;
         case '!': peek_next() == '=' ? handle_two_char_operator(NOT_EQ, '=') : add_token(L_NOT); break;
-        case '|': peek_next() == '|' ? handle_two_char_operator(L_OR, '|') : add_token(TokenType::B_OR); break;
+        case '|': peek_next() == '|' ? handle_two_char_operator(L_OR, '|') : add_token(B_OR); break;
         case '&': peek_next() == '&' ? handle_two_char_operator(L_AND, '&') : add_token(B_AND); break;
         case '^': peek_next() == '^' ? handle_two_char_operator(L_XOR, '^') : add_token(B_XOR); break;
         case '~': add_token(B_NOT); break;
@@ -201,6 +199,8 @@ void Scanner::scan_token() {
         // Ignore whitespace
         case ' ':
         case '\r':
+        // TODO: make this actually a line continue character
+        case '\\':
         case '\t': break;
         case '\n': add_token(NEWLINE); line++; break;
         default:
@@ -223,5 +223,6 @@ void Scanner::scan_tokens() {
 }
 
 void Scanner::throw_error(std::string message) {
-    std::cout << std::format("Error on line {}: {}", line, message) << std::endl;
+    Tilda::had_error = true;
+    throw std::format("Error on line {}: {}", line, message);
 }

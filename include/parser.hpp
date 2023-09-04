@@ -30,12 +30,16 @@ class Parser {
     ShrStmtPtr handle_declaration();
     ShrStmtPtr handle_variable();
     ShrStmtPtr handle_statement();
+    ShrStmtPtr handle_if();
     ShrStmtPtr handle_print();
     ShrStmtPtr handle_type();
     std::vector<ShrStmtPtr> handle_block();
     ShrStmtPtr handle_expression_statement();
     ShrExprPtr handle_expression();
     ShrExprPtr handle_assignment();
+    ShrExprPtr handle_logical_or();
+    ShrExprPtr handle_logical_and();
+    ShrExprPtr handle_logical_xor();
     ShrExprPtr handle_ternary();
     ShrExprPtr handle_equality();
     ShrExprPtr handle_bitwise();

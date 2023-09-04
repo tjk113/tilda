@@ -41,7 +41,6 @@ struct Interpreter : ExpressionVisitor<std::any>, StatementVisitor {
     void visit_declare_statement(ShrDeclareStmtPtr statement);
     void visit_assign_statement(ShrAssignStmtPtr statement);
     void visit_if_statement(ShrIfStmtPtr statement);
-    void visit_else_statement(ShrElseStmtPtr statement);
     void visit_while_statement(ShrWhileStmtPtr statement);
     void visit_for_statement(ShrForStmtPtr statement);
     void visit_forin_statement(ShrForInStmtPtr statement);

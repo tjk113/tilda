@@ -18,6 +18,7 @@ class Scanner {
 
     std::map<std::string, TokenType> keywords = {
         {"if", IF},
+        {"elif", ELIF},
         {"else", ELSE},
         {"while", WHILE},
         {"for", FOR},
@@ -29,6 +30,7 @@ class Scanner {
         {"let", LET},
         {"const", CONST},
         {"struct", STRUCT},
+        {"fn", FN},
         // TODO: add classes
     };
 

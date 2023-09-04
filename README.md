@@ -7,15 +7,20 @@ implementation informed by [Crafting Interpreters](https://craftinginterpreters.
 ```
 program               -> declaration_statement* END_TOKEN ;
 
-declaration_statement -> variable_declaration
-                       | statement ;
+declaration_statement -> variable_declaration NEWLINE
+                       | statement NEWLINE ;
 
 variable_declaration  -> "const"? TYPE IDENTIFIER ( "=" expression )?
                        | ( "let" | "const" ) IDENTIFIER ( "=" expression )? ;
 
 statement             -> expression_statement
+                       | if_statement
                        | print_statement
                        | block ;
+
+if_statement          -> "if" "(" expression ")" block
+                         ( "elif" "(" expression ")" block )?
+                         ( "else" block )?
 
 block                 -> "{" declaration_statement* "}" ;
 
@@ -25,8 +30,12 @@ expression_statement  -> expression ;
 
 expression            -> assignment ;
 
-assignment            -> IDENTIFIER "=" assignment
-                       | equality ;
+assignment            -> IDENTIFIER ( "=" | "+=" | "-=" | "*=" | "/=" | "%=" | "|=" | "&=" | "^=" ) assignment
+                       | logical_or ;
+
+logical_or            -> logical_and ( "||" logical_and )* ;
+
+logical_and           -> equality ( "&&" equality )* ;
 
 ternary               -> equality "?" equality ":" ( expression )* ;
 
@@ -38,7 +47,7 @@ bitwise               -> term ( ( "|" | "&" | "^" | "@" | "<<" | ">>" ) ( term |
 
 term                  -> factor ( ( "-" | "+" ) factor )* ;
 
-factor                -> unary ( ( "/" | "\*" | "\\" | "**" | "%" ) unary )* ;
+factor                -> unary ( ( "/" | "*" | "**" | "%" ) unary )* ;
 
 unary                 -> ( "!" | "-" | "~" | "++" | "--" )? unary ( "++" | "--" )?  
                        | primary ;
@@ -50,6 +59,7 @@ primary               -> NUMBER | STRING | TRUE | FALSE
 
 ## keywords
 - `if`
+- `elif`
 - `else`
 - `while`
 - `for`
@@ -62,6 +72,7 @@ primary               -> NUMBER | STRING | TRUE | FALSE
 - `false`
 - `let`
 - `const`
+- `fn`
 - `struct`
 
 ## types
@@ -89,10 +100,14 @@ primary               -> NUMBER | STRING | TRUE | FALSE
 - SUB `a - b`
 - MUL `a * b`
 - DIV `a / b`
-- INT_DIV `a \ b`
 - POW `a**b`
 - NEG `-a`
 - MOD `a % b`
+- ADD_EQ `+=`
+- SUB_EQ `-=`
+- MUL_EQ `*=`
+- DIV_EQ `/=`
+- POW_EQ `**=`
 - INC `a++` / `++a`
 - DEC `a--` / `--a`
 ### logical
@@ -129,6 +144,8 @@ primary               -> NUMBER | STRING | TRUE | FALSE
   Prints provided value. It will attempt to print values of any type, and throw an error if it can't.
 - `hex()` / `bin()`  
   Returns a string containing the respective hexadecimal or binary representation of the provided number.
+- `type()`
+  Returns a string containing the type of the provided value.
 
 ## scoping
 scopes are declared with curly braces `{}`. single-line scopes can be declared within a single line, or with a newline, where the scope begins and ends on the following line.

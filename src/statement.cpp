@@ -37,18 +37,11 @@ void DeclareStatement::accept(StatementVisitor& visitor) {
     return visitor.visit_declare_statement(shared_from_this());
 }
 
-IfStatement::IfStatement(ShrExprPtr expression) :
-    expression(expression) {}
+IfStatement::IfStatement(ShrExprPtr expression, ShrStmtPtr then_branch, ShrStmtPtr else_branch) :
+    expression(expression), then_branch(then_branch), else_branch(else_branch) {}
 
 void IfStatement::accept(StatementVisitor& visitor) {
     return visitor.visit_if_statement(shared_from_this());
-}
-
-ElseStatement::ElseStatement(ShrExprPtr expression) :
-    expression(expression) {}
-
-void ElseStatement::accept(StatementVisitor& visitor) {
-    return visitor.visit_else_statement(shared_from_this());
 }
 
 WhileStatement::WhileStatement(ShrExprPtr expression) :

@@ -14,18 +14,14 @@
 #include "error.hpp"
 
 // TODO: where does type assignment to identifiers happen?
-// it should probably happen before we're parsing...
 
 Parser::Parser(std::vector<Token> tokens) :
     tokens(tokens) {}
 
 std::vector<ShrStmtPtr> Parser::parse() {
     std::vector<ShrStmtPtr> statements;
-    // TODO: error handling
     while (!is_at_end())
         statements.push_back(handle_declaration());
-    // if (Error::had_error)
-    //     return nullptr;
     return statements;
 }
 
@@ -103,10 +99,12 @@ Token Parser::consume(TokenType type, std::string message) {
 }
 
 void Parser::throw_error(Token token, std::string message) {
-    if (token.type == END_TOKEN)
-        Error::report(token.line, "at end", message);
-    else
-        Error::report(token.line, "at " + token.lexeme, message);
+    Tilda::had_error = true;
+    throw std::format("[line {}] Error {}: {}", token.line, (token.type == END_TOKEN ? "at end" : "at "), message);
+    // if (token.type == END_TOKEN)
+    //     Error::report(token.line, "at end", message);
+    // else
+        // Error::report(token.line, "at " + token.lexeme, message);
 }
 
 void Parser::synchronize() {
@@ -131,9 +129,12 @@ void Parser::synchronize() {
 }
 
 ShrStmtPtr Parser::handle_declaration() {
-    // TODO: error handling!!!
     if (match(CONST, LET, TYPE))
         return handle_variable();
+    else if (Tilda::had_error) {
+        synchronize();
+        return nullptr;
+    }
     return handle_statement();
 }
 
@@ -159,10 +160,27 @@ ShrStmtPtr Parser::handle_variable() {
 }
 
 ShrStmtPtr Parser::handle_statement() {
+    if (match(IF)) return handle_if();
     if (match(PRINT)) return handle_print();
     if (match(TYPEOF)) return handle_type();
     if (match(L_BRACE)) return std::make_shared<BlockStatement>(handle_block());
     return handle_expression_statement();
+}
+
+ShrStmtPtr Parser::handle_if() {
+    consume(L_PAREN, "Expected parenthesis after \"if\".");
+    ShrExprPtr expression = handle_expression();
+    consume(R_PAREN, "Expected parenthesis after expresion.");
+
+    ShrStmtPtr then_branch = handle_statement();
+
+    // TODO: elif statements
+
+    ShrStmtPtr else_branch = nullptr;
+    if (match(ELSE))
+        else_branch = handle_statement();
+
+    return std::make_shared<IfStatement>(expression, then_branch, else_branch);
 }
 
 ShrStmtPtr Parser::handle_print() {
@@ -202,7 +220,7 @@ ShrExprPtr Parser::handle_expression() {
 }
 
 ShrExprPtr Parser::handle_assignment() {
-    ShrExprPtr expression = handle_ternary();
+    ShrExprPtr expression = handle_logical_or();
 
     if (match(ASSIGN)) {
         Token target = previous();
@@ -214,6 +232,42 @@ ShrExprPtr Parser::handle_assignment() {
         }
         // Report error
         std::cout << std::format("Invalid assignment target: \"{}\"", target.lexeme);
+    }
+
+    return expression;
+}
+
+ShrExprPtr Parser::handle_logical_or() {
+    ShrExprPtr expression = handle_logical_and();
+
+    while (match(L_OR)) {
+        TokenType type = previous().type;
+        ShrExprPtr r_expression = handle_logical_and();
+        expression = std::make_shared<LogicalExpression>(type, expression, r_expression);
+    }
+
+    return expression;
+}
+
+ShrExprPtr Parser::handle_logical_and() {
+    ShrExprPtr expression = handle_logical_xor();
+
+    while (match(L_AND)) {
+        TokenType type = previous().type;
+        ShrExprPtr r_expression = handle_logical_xor();
+        expression = std::make_shared<LogicalExpression>(type, expression, r_expression);
+    }
+
+    return expression;
+}
+
+ShrExprPtr Parser::handle_logical_xor() {
+    ShrExprPtr expression = handle_ternary();
+
+    while (match(L_XOR)) {
+        TokenType type = previous().type;
+        ShrExprPtr r_expression = handle_ternary();
+        expression = std::make_shared<LogicalExpression>(type, expression, r_expression);
     }
 
     return expression;
@@ -279,7 +333,7 @@ ShrExprPtr Parser::handle_term() {
 ShrExprPtr Parser::handle_factor() {
     ShrExprPtr expression = handle_unary();
 
-    if (match(DIV, MUL, INT_DIV, POW, MOD)) {
+    if (match(DIV, MUL, POW, MOD)) {
         TokenType type = previous().type;
         ShrExprPtr r_expression = handle_unary();
         expression = std::make_shared<BinaryExpression>(type, expression, r_expression);

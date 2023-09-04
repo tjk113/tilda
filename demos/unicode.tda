@@ -1,0 +1,2 @@
+str text = "Hello, 世界!"
+print(text)

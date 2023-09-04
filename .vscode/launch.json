@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceRoot}/bin/tilda.exe",
-            "args": ["${workspaceRoot}/demos/scope.tda"],
+            "args": ["${workspaceRoot}/demos/logical.tda"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],

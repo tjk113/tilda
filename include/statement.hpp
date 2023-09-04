@@ -18,7 +18,6 @@ struct BlockStatement;
 struct DeclareStatement;
 struct AssignStatement;
 struct IfStatement;
-struct ElseStatement;
 struct Statement;
 struct WhileStatement;
 struct ForStatement;
@@ -35,7 +34,6 @@ typedef std::shared_ptr<BlockStatement> ShrBlockStmtPtr;
 typedef std::shared_ptr<DeclareStatement> ShrDeclareStmtPtr;
 typedef std::shared_ptr<AssignStatement> ShrAssignStmtPtr;
 typedef std::shared_ptr<IfStatement> ShrIfStmtPtr;
-typedef std::shared_ptr<ElseStatement> ShrElseStmtPtr;
 typedef std::shared_ptr<WhileStatement> ShrWhileStmtPtr;
 typedef std::shared_ptr<ForStatement> ShrForStmtPtr;
 typedef std::shared_ptr<ForInStatement> ShrForInStmtPtr;
@@ -51,7 +49,6 @@ struct StatementVisitor {
     virtual void visit_declare_statement(ShrDeclareStmtPtr statement) = 0;
     virtual void visit_assign_statement(ShrAssignStmtPtr statement) = 0;
     virtual void visit_if_statement(ShrIfStmtPtr statement) = 0;
-    virtual void visit_else_statement(ShrElseStmtPtr statement) = 0;
     virtual void visit_while_statement(ShrWhileStmtPtr statement) = 0;
     virtual void visit_for_statement(ShrForStmtPtr statement) = 0;
     virtual void visit_forin_statement(ShrForInStmtPtr statement) = 0;
@@ -105,15 +102,10 @@ struct DeclareStatement : Statement, public std::enable_shared_from_this<Declare
 
 struct IfStatement : Statement, public std::enable_shared_from_this<IfStatement> {
     ShrExprPtr expression;
+    ShrStmtPtr then_branch;
+    ShrStmtPtr else_branch;
 
-    IfStatement(ShrExprPtr expression);
-    void accept(StatementVisitor& statement_visitor) override;
-};
-
-struct ElseStatement : Statement, public std::enable_shared_from_this<ElseStatement> {
-    ShrExprPtr expression;
-
-    ElseStatement(ShrExprPtr expression);
+    IfStatement(ShrExprPtr expression, ShrStmtPtr then_branch, ShrStmtPtr else_branch);
     void accept(StatementVisitor& statement_visitor) override;
 };
 

@@ -4,15 +4,34 @@ struct Student {
     str name
 }
 
-void fizzbuzz(int n) {
+fn fizzbuzz(int n) {
     for i in 0..n {
         if i % 3 == 0
             print()
-        else if i % 5 == 0
+        elif i % 5 == 0
             print("buzz")
         else
             print(n)
     }
+}
+
+str get_name_length(str name) {
+    let name_length = ""
+    const u64 big_num = 0xFFFFFFFFFFFF
+
+    if name.length <= 5
+        name_length = "short name"
+    elif name.length > 5
+        name_length = "long name"
+    else {
+        name_length = "i don't know what to say about this name"
+        for letter in name {
+            if letter.isdigit
+                name_length = "why is there a number in the name?"
+        }
+    }
+
+    return name_length
 }
 
 void main() {
@@ -20,9 +39,14 @@ void main() {
     u8 sum = num + 1
     let dec = 10.25
     str text = "Hello, 世界!"
+    // str text = "Am I C or Python?"
     struct Student pupil = {.id = 110411, .year 2, .name = "Sky"}
 
     print(text)
     fizzbuzz(sum)
     print(pupil)
+
+    print(get_name_length("marcy"))
+    print(get_name_length("rasputin"))
+    print(get_name_length("child2"))
 }

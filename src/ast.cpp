@@ -14,7 +14,6 @@ std::string AST::print(ShrExprPtr expression) {
     return std::any_cast<std::string>(expression->accept(*this));
 }
 
-// TODO: why is this getting passed a LiteralExpression*???
 template<class... E>
 std::string AST::parenthesize(std::string label, E... expressions) {
     std::ostringstream buf;

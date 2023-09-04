@@ -1,0 +1,23 @@
+const int n = 10
+if (n > 9)
+    print("it's big")
+
+if n > 9 {
+    print("it's big")
+}
+
+if (n > 9) {
+    print("it's huge UwU")
+}
+
+if n > 9 {
+    print("Wow! That number is of significant magnitude in the positive direction!")
+}
+
+if n > 9:
+    print("I have nothing to say about this turn of events")
+
+// warning: stored the result of a division in an integer variable
+i32 a = 3 / 2
+
+return true

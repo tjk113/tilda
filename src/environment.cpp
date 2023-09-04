@@ -6,6 +6,7 @@
 #include <map>
 
 #include "environment.hpp"
+#include "tilda.hpp"
 
 Environment::Environment() {
     enclosing = nullptr;
@@ -15,7 +16,8 @@ Environment::Environment(std::shared_ptr<Environment> enclosing) :
     enclosing(enclosing) {}
 
 void Environment::throw_error(std::string message) {
-    std::cout << message << std::endl;
+    Tilda::had_runtime_error = true;
+    throw message;
 }
 
 void Environment::define(std::string identifier, std::any value) {

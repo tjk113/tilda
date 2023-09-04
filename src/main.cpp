@@ -23,6 +23,8 @@ void from_file(std::string path) {
     std::fstream fstream(path);
     std::string src;
 
+    Interpreter interpreter;
+
     if (fstream) {
         std::ostringstream stringstream;
         stringstream << fstream.rdbuf() << "\n";
@@ -32,11 +34,17 @@ void from_file(std::string path) {
         std::cout << "Input file could not be read" << std::endl;
         return;
     }
-    Interpreter interpreter;
-    Scanner scanner(src);
-    Parser parser(scanner.tokens);
-    std::vector<ShrStmtPtr> statements = parser.parse();
-    interpreter.interpret(statements);
+
+    try {
+        Scanner scanner(src);
+        Parser parser(scanner.tokens);
+        std::vector<ShrStmtPtr> statements = parser.parse();
+        interpreter.interpret(statements);
+    }
+    catch (std::string message) {
+        std::cout << message << std::endl;
+    }
+    Tilda::had_error = Tilda::had_runtime_error = false;
 }
 
 void from_repl() {
@@ -55,10 +63,16 @@ void from_repl() {
         if (line == "\n")
             continue;
 
-        Scanner scanner(line);
-        Parser parser(scanner.tokens);
-        std::vector<ShrStmtPtr> statements = parser.parse();
-        interpreter.interpret(statements);
+        try {
+            Scanner scanner(line);
+            Parser parser(scanner.tokens);
+            std::vector<ShrStmtPtr> statements = parser.parse();
+            interpreter.interpret(statements);
+        }
+        catch (std::string message) {
+            std::cout << message << std::endl;
+        }
+        Tilda::had_error = Tilda::had_runtime_error = false;
     }
 }
 

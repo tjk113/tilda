@@ -14,8 +14,10 @@
 #include "tilda.hpp"
 
 void Interpreter::interpret(std::vector<ShrStmtPtr> statements) {
-    for (ShrStmtPtr statement : statements)
-        execute(statement);
+    for (ShrStmtPtr statement : statements) {
+        if (!Tilda::had_error && !Tilda::had_runtime_error)
+            execute(statement);
+    }
 }
 
 std::string Interpreter::to_string(std::any value) {
@@ -52,7 +54,6 @@ void Interpreter::execute(ShrStmtPtr statement) {
 void Interpreter::execute_block(std::vector<ShrStmtPtr> statements, std::shared_ptr<Environment> environment) {
     // Make a new environment enclosed by the current environment
     std::shared_ptr<Environment> previous = this->environment;
-    // TODO: error handling
     this->environment = environment;
     for (ShrStmtPtr statement : statements) {
         if (!Tilda::had_error && !Tilda::had_runtime_error)
@@ -85,15 +86,20 @@ bool Interpreter::get_truthiness(std::any operand) {
     }
     catch (std::bad_any_cast) {
         try {
-            return std::any_cast<double>(operand) > 0 ? true : false;
+            return std::any_cast<int64_t>(operand) != 0 ? true : false;
         }
         catch (std::bad_any_cast) {
             try {
-                std::string str = std::any_cast<std::string>(operand);
-                return str != "";
+                return std::any_cast<double>(operand) != 0 ? true : false;
             }
             catch (std::bad_any_cast) {
-                ;
+                try {
+                    std::string str = std::any_cast<std::string>(operand);
+                    return str != "";
+                }
+                catch (std::bad_any_cast) {
+                    ;
+                }
             }
         }
     }
@@ -132,19 +138,18 @@ bool Interpreter::get_equality(std::any l_operand, std::any r_operand) {
 }
 
 void Interpreter::throw_error(std::string message) {
-    std::cout << std::format("Runtime Error: {}", message) << std::endl;
     Tilda::had_runtime_error = true;
+    throw std::format("Runtime Error: {}", message);
 }
 
-bool Interpreter::check_number_operand(TokenType type, std::any operand/*, std::string operand_type*/) {
+bool Interpreter::check_number_operand(TokenType type, std::any operand) {
     if (operand.type() == typeid(int64_t) || operand.type() == typeid(double))
         return false;
     throw_error(std::format("Operand of \"{}\" must be a number.", Token::token_type_names[type]));
     return true;
 }
 
-bool Interpreter::check_number_operands(TokenType type, std::any l_operand, std::any r_operand/*,
-                                        std::string l_operand_type, std::string r_operand_type*/) {
+bool Interpreter::check_number_operands(TokenType type, std::any l_operand, std::any r_operand) {
     if (l_operand.type() == typeid(int64_t) && r_operand.type() == typeid(int64_t)
         || l_operand.type() == typeid(double) && r_operand.type() == typeid(double))
         return false;
@@ -176,11 +181,17 @@ std::any Interpreter::visit_unary_expression(ShrUnaryExprPtr expression) {
         case INC:
             if (check_number_operand(expression->type, operand))
                 break;
-            return std::any_cast<double>(operand) + 1;
+            if (operand.type() == typeid(int64_t))
+                return std::any_cast<int64_t>(operand) + 1;
+            else if (operand.type() == typeid(double))
+                return std::any_cast<double>(operand) + 1;
         case DEC:
             if (check_number_operand(expression->type, operand))
                 break;
-            return std::any_cast<double>(operand) - 1;
+            if (operand.type() == typeid(int64_t))
+                return std::any_cast<int64_t>(operand) - 1;
+            else if (operand.type() == typeid(double))
+                return std::any_cast<double>(operand) - 1;
     }
     // Unreachable
     return std::any(); // NULL std::any
@@ -303,13 +314,6 @@ std::any Interpreter::visit_binary_expression(ShrBinaryExprPtr expression) {
                 return std::any_cast<int64_t>(l_operand) / std::any_cast<int64_t>(r_operand);
             else
                 return std::any_cast<double>(l_operand) / std::any_cast<double>(r_operand);
-        case INT_DIV:
-            if (check_number_operands(expression->type, l_operand, r_operand))
-                break;
-            if (l_operand.type() == typeid(int64_t))
-                return std::any_cast<int64_t>(l_operand) / std::any_cast<int64_t>(r_operand);
-            else
-                return static_cast<int64_t>(std::any_cast<double>(l_operand)) / static_cast<int64_t>(std::any_cast<double>(r_operand));
         case POW:
             if (check_number_operands(expression->type, l_operand, r_operand))
                 break;
@@ -330,9 +334,8 @@ std::any Interpreter::visit_binary_expression(ShrBinaryExprPtr expression) {
 
 std::any Interpreter::visit_ternary_expression(ShrTernaryExprPtr expression) {
     // TODO: this
-    // bool condition = get_truthiness(evaluate(expression->condition));
-    // return condition ? evaluate(expression->l_operand) : evaluate(expression->r_operand);
-    ;
+    bool condition = get_truthiness(evaluate(expression->condition));
+    return condition ? evaluate(expression->l_operand) : evaluate(expression->r_operand);
 }
 
 std::any Interpreter::visit_literal_expression(ShrLiteralExprPtr expression) {
@@ -366,7 +369,17 @@ std::any Interpreter::visit_call_expression(ShrCallExprPtr expression) {
 }
 
 std::any Interpreter::visit_logical_expression(ShrLogicalExprPtr expression) {
-    ;
+    std::any l_operand = evaluate(expression->l_operand);
+    std::any r_operand = evaluate(expression->r_operand);
+
+    switch (expression->type) {
+        case L_OR:
+            return get_truthiness(l_operand) || get_truthiness(r_operand);
+        case L_AND:
+            return get_truthiness(l_operand) && get_truthiness(r_operand);
+        case L_XOR:
+            return get_truthiness(l_operand) != get_truthiness(r_operand);
+    }
 }
 
 std::any Interpreter::visit_bitwise_expression(ShrBitwiseExprPtr expression) {
@@ -431,11 +444,11 @@ void Interpreter::visit_assign_statement(ShrAssignStmtPtr statement) {
 }
 
 void Interpreter::visit_if_statement(ShrIfStmtPtr statement) {
-    ;
-}
-
-void Interpreter::visit_else_statement(ShrElseStmtPtr statement) {
-    ;
+    bool condition = get_truthiness(evaluate(statement->expression));
+    if (condition)
+        execute(statement->then_branch);
+    else
+        execute(statement->else_branch);
 }
 
 void Interpreter::visit_while_statement(ShrWhileStmtPtr statement) {

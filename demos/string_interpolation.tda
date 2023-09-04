@@ -1,0 +1,7 @@
+str greet(str name) {
+    return i"Hello, {name}"
+}
+
+fn main() {
+    print(greet("Jameson"))
+}

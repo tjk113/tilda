@@ -21,6 +21,7 @@ std::map<TokenType, std::string> Token::token_type_names = {
     {COMMENT, "//"},
     // Keywords
     {IF, "if"},
+    {ELIF, "elif"},
     {ELSE, "else"},
     {WHILE, "while"},
     {FOR, "for"},
@@ -32,6 +33,7 @@ std::map<TokenType, std::string> Token::token_type_names = {
     {LET, "let"},
     {CONST, "const"},
     {STRUCT, "struct"},
+    {FN, "fn"},
     // Values
     {IDENTIFIER, "identifier"},
     {TYPE, "type"},
@@ -42,10 +44,14 @@ std::map<TokenType, std::string> Token::token_type_names = {
     {SUB, "-"},
     {MUL, "*"},
     {DIV, "/"},
-    {INT_DIV, "\\"},
     {POW, "**"},
     {NEG, "-"},
     {MOD, "%"},
+    {ADD_EQ, "+="},
+    {SUB_EQ, "-="},
+    {MUL_EQ, "*="},
+    {DIV_EQ, "/="},
+    {POW_EQ, "**="},
     {INC, "++"},
     {DEC, "--"},
     // Logical Operators

@@ -1,0 +1,9 @@
+bool boolean = 1 && 1
+print "result of 1 && 1:"
+print boolean
+bool boolean_2 = 0 || 0
+print "result of 0 || 0:"
+print boolean_2
+bool boolean_3 = 1 ^^ 1
+print "result of 1 ^^ 1:"
+print boolean_3

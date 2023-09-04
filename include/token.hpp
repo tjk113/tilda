@@ -13,14 +13,15 @@ enum TokenType {
     RANGE, ACCESS, DEREF_ACESS, DEREF, 
     NEWLINE, COMMENT,
     // Keywords
-    IF, ELSE, WHILE, FOR, BREAK, CONTINUE, 
+    IF, ELIF, ELSE, WHILE, FOR, BREAK, CONTINUE,
     IN, SWITCH, RETURN, TRUE, FALSE,
-    LET, CONST, STRUCT,
+    LET, CONST, STRUCT, FN,
     // Values
     IDENTIFIER, TYPE, STR, NUM,
     // Math Operators
-    ADD, SUB, MUL, DIV, INT_DIV, POW, NEG,
-    MOD, INC, DEC,
+    ADD, SUB, MUL, DIV, POW, NEG,
+    MOD, INC, DEC, ADD_EQ, SUB_EQ,
+    MUL_EQ, DIV_EQ, POW_EQ,
     // Logical Operators
     LESS, GREATER, LESS_EQ, GREATER_EQ,
     NOT_EQ, EQ, L_OR, L_AND, L_XOR, L_NOT,
