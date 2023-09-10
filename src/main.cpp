@@ -19,6 +19,37 @@ void print_token_values(std::vector<Token> toks) {
         std::cout << Token::token_type_names[tok.type] << ": " << tok.lexeme << std::endl;
 }
 
+std::string get_statement_type(ShrStmtPtr statement) {
+    if (typeid(*statement) == typeid(Statement))
+        return "Statement";
+    else if (typeid(*statement) == typeid(ExpressionStatement))
+        return "ExpressionStatement";
+    else if (typeid(*statement) == typeid(PrintStatement))
+        return "PrintStatement";
+    else if (typeid(*statement) == typeid(TypeStatement))
+        return "TypeStatement";
+    else if (typeid(*statement) == typeid(BlockStatement))
+        return "BlockStatement";
+    else if (typeid(*statement) == typeid(DeclareStatement))
+        return "DeclareStatement";
+    else if (typeid(*statement) == typeid(IfStatement))
+        return "IfStatement";
+    else if (typeid(*statement) == typeid(WhileStatement))
+        return "WhileStatement";
+    else if (typeid(*statement) == typeid(ForStatement))
+        return "ForStatement";
+    else if (typeid(*statement) == typeid(ForInStatement))
+        return "ForInStatement";
+    else if (typeid(*statement) == typeid(SwitchStatement))
+        return "SwitchStatement";
+    else if (typeid(*statement) == typeid(ReturnStatement))
+        return "ReturnStatement";
+    else if (typeid(*statement) == typeid(StructStatement))
+        return "StructStatement";
+    else
+        return "Unknown Statement type";
+}
+
 void from_file(std::string path) {
     std::fstream fstream(path);
     std::string src;
@@ -67,6 +98,7 @@ void from_repl() {
             Scanner scanner(line);
             Parser parser(scanner.tokens);
             std::vector<ShrStmtPtr> statements = parser.parse();
+            // Typechecker typechecker(statements);
             interpreter.interpret(statements);
         }
         catch (std::string message) {

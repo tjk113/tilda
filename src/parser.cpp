@@ -100,7 +100,7 @@ Token Parser::consume(TokenType type, std::string message) {
 
 void Parser::throw_error(Token token, std::string message) {
     Tilda::had_error = true;
-    throw std::format("[line {}] Error {}: {}", token.line, (token.type == END_TOKEN ? "at end" : "at "), message);
+    throw std::format("[line {}] Error {}: {}", token.line, (token.type == END_TOKEN ? "at end" : "at \"" + token.lexeme + "\""), message);
     // if (token.type == END_TOKEN)
     //     Error::report(token.line, "at end", message);
     // else
@@ -148,29 +148,116 @@ ShrStmtPtr Parser::handle_variable() {
         literal_type = StringToLiteralType::map[previous().lexeme];
     else if (previous().type == LET || match(LET))
         ;
-
+    
     Token identifier = consume(IDENTIFIER, "Expected identifier.");
 
     if (match(ASSIGN))
         expression = handle_expression();
-    
-    consume(NEWLINE, "Expected newline after variable declaration.");
 
+    if (check(NEWLINE))
+        consume(NEWLINE, "Expected newline after variable declaration.");
+    // Dirty hack to support for loop comma statement delimiters
+    // TODO: this technically allows for commas to delimit any statement.
+    //       that shouldn't be allowed...maybe
+    else if (check(COMMA))
+        consume(COMMA, "Expected comma after \"for\" loop variable declaration.");
+    
     return std::make_shared<DeclareStatement>(identifier, literal_type, expression);
 }
 
 ShrStmtPtr Parser::handle_statement() {
+    if (match(FOR)) return handle_for();
     if (match(IF)) return handle_if();
     if (match(PRINT)) return handle_print();
+    if (match(WHILE)) return handle_while();
     if (match(TYPEOF)) return handle_type();
     if (match(L_BRACE)) return std::make_shared<BlockStatement>(handle_block());
     return handle_expression_statement();
 }
 
+ShrStmtPtr Parser::handle_for() {
+    consume(L_PAREN, "Expected \"(\" after \"for\".");
+
+    ShrStmtPtr initializer;
+    if (match(COMMA))
+        initializer = nullptr;
+    else if (check(TYPE) || check(LET))
+        initializer = handle_declaration();
+    else if (match(CONST))
+        throw_error(peek(), "\"For\" loop initializer cannot be const.");
+    else
+        initializer = handle_expression_statement();
+
+    ShrExprPtr condition = nullptr;
+    if (!check(COMMA))
+        condition = handle_expression();
+    consume(COMMA, "Expected \",\" after loop condition.");
+
+    ShrExprPtr increment = nullptr;
+    if (!check(R_PAREN))
+        increment = handle_expression();
+    consume(R_PAREN, "Expected \")\" after \"for\" clauses.");
+    
+    ShrStmtPtr body = handle_statement();
+
+    /*
+    body:
+        {
+            <for loop statements...>
+        }
+    */
+
+    if (increment != nullptr) {
+        std::vector<ShrStmtPtr> body_statements = {body, std::make_shared<ExpressionStatement>(increment)};
+        body = std::make_shared<BlockStatement>(body_statements);
+    }
+
+    /*
+    body:
+        {
+            <for loop statements...>
+            <increment statement>
+        }
+    */
+
+    if (condition == nullptr)
+        condition = std::make_shared<LiteralExpression>(TRUE, true);
+    body = std::make_shared<WhileStatement>(condition, body);
+
+    /*
+    body:
+        while (<condition>)
+        {
+            <for loop statements...>
+            <increment statement>
+        }
+    */
+
+    if (initializer != nullptr) {
+        std::vector<ShrStmtPtr> body_statements = {initializer, body};
+        body = std::make_shared<BlockStatement>(body_statements);
+    }
+
+    /*
+    body:
+    {
+        while (<condition>)
+        {
+            {
+                <for loop statements...>
+                <increment statement>
+            }
+        }
+    }
+    */
+
+    return body;
+}
+
 ShrStmtPtr Parser::handle_if() {
-    consume(L_PAREN, "Expected parenthesis after \"if\".");
+    consume(L_PAREN, "Expected \"(\" after \"if\".");
     ShrExprPtr expression = handle_expression();
-    consume(R_PAREN, "Expected parenthesis after expresion.");
+    consume(R_PAREN, "Expected \")\" after expresion.");
 
     ShrStmtPtr then_branch = handle_statement();
 
@@ -183,14 +270,26 @@ ShrStmtPtr Parser::handle_if() {
     return std::make_shared<IfStatement>(expression, then_branch, else_branch);
 }
 
+ShrStmtPtr Parser::handle_while() {
+    consume(L_PAREN, "Expected \"(\" after \"while\".");
+    ShrExprPtr expression = handle_expression();
+    consume(R_PAREN, "Expected \")\" after expresion.");
+
+    ShrStmtPtr statements = handle_statement();
+
+    return std::make_shared<WhileStatement>(expression, statements);
+}
+
 ShrStmtPtr Parser::handle_print() {
     ShrExprPtr expression = handle_expression();
+    // TODO: should commas be allowed as statement delimiters?
     consume(NEWLINE, "Expected newline after value.");
     return std::make_shared<PrintStatement>(expression);
 }
 
 ShrStmtPtr Parser::handle_type() {
     ShrExprPtr expression = handle_expression();
+    // TODO: should commas be allowed as statement delimiters?
     consume(NEWLINE, "Expected newline after value.");
     return std::make_shared<TypeStatement>(expression);
 }
@@ -198,20 +297,26 @@ ShrStmtPtr Parser::handle_type() {
 std::vector<ShrStmtPtr> Parser::handle_block() {
     std::vector<ShrStmtPtr> statements;
 
-    match(NEWLINE);
+    if (check(NEWLINE))
+        match(NEWLINE);
 
     while (!check(R_BRACE) && !is_at_end())
         statements.push_back(handle_declaration());
     consume(R_BRACE, "Expected \"}\" after block.");
 
-    match(NEWLINE);
+    if (check(NEWLINE))
+        match(NEWLINE);
     
     return statements;
 }
 
 ShrStmtPtr Parser::handle_expression_statement() {
     ShrExprPtr expression = handle_expression();
-    consume(NEWLINE, "Expected newline after expression.");
+    // TODO: should commas be allowed as statement delimiters?
+    if (check(NEWLINE))
+        consume(NEWLINE, "Expected newline or comma after expression.");
+    // else if (check(COMMA))
+    //     consume(COMMA, "Expected newline or comma after expression.");
     return std::make_shared<ExpressionStatement>(expression);
 }
 

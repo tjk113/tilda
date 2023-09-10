@@ -19,6 +19,7 @@ std::map<TokenType, std::string> Token::token_type_names = {
     {RANGE, ".."},
     {ACCESS, "."},
     {COMMENT, "//"},
+    {SEMICOLON, ";"},
     // Keywords
     {IF, "if"},
     {ELIF, "elif"},

@@ -32,6 +32,8 @@ class Parser {
     ShrStmtPtr handle_statement();
     ShrStmtPtr handle_if();
     ShrStmtPtr handle_print();
+    ShrStmtPtr handle_while();
+    ShrStmtPtr handle_for();
     ShrStmtPtr handle_type();
     std::vector<ShrStmtPtr> handle_block();
     ShrStmtPtr handle_expression_statement();

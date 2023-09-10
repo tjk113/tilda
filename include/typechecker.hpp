@@ -1,10 +1,12 @@
 #pragma once
 
+#include <vector>
+
+#include "statement.hpp"
 #include "token.hpp"
-#include "ast.hpp"
 
 class Typechecker {
 
 public:
-    Typechecker(AST ast);
+    Typechecker(std::vector<ShrStmtPtr> statements);
 };

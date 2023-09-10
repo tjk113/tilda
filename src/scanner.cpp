@@ -183,6 +183,7 @@ void Scanner::scan_token() {
             else
                 add_token(DIV);
             break;
+        case ';': add_token(SEMICOLON); break;
         case '%': add_token(MOD); break;
         case '.': peek_next() == '.' ? handle_two_char_operator(RANGE, '.') : add_token(ACCESS); break;
         case '=': peek_next() == '=' ? handle_two_char_operator(EQ, '=') : add_token(ASSIGN); break;
@@ -210,7 +211,7 @@ void Scanner::scan_token() {
             else if (isalnum(c))
                 handle_identifier_or_type();
             else
-                throw_error("Unexpected character!");
+                throw_error(std::format("Unexpected character \"{}\"!", c));
     }
 }
 

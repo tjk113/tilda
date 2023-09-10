@@ -14,9 +14,17 @@ variable_declaration  -> "const"? TYPE IDENTIFIER ( "=" expression )?
                        | ( "let" | "const" ) IDENTIFIER ( "=" expression )? ;
 
 statement             -> expression_statement
+                       | for_statement
                        | if_statement
                        | print_statement
+                       | while_statement
                        | block ;
+
+for_statement         -> "for" "(" ( variable_declaration | expression_statement | ";" )
+                         expression? ";"
+                         expression? ";" ")" statement ;
+
+while_statement       -> "while" "(" expression ")" statement ;
 
 if_statement          -> "if" "(" expression ")" block
                          ( "elif" "(" expression ")" block )?

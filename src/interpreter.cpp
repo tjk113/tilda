@@ -333,7 +333,6 @@ std::any Interpreter::visit_binary_expression(ShrBinaryExprPtr expression) {
 }
 
 std::any Interpreter::visit_ternary_expression(ShrTernaryExprPtr expression) {
-    // TODO: this
     bool condition = get_truthiness(evaluate(expression->condition));
     return condition ? evaluate(expression->l_operand) : evaluate(expression->r_operand);
 }
@@ -439,10 +438,6 @@ void Interpreter::visit_declare_statement(ShrDeclareStmtPtr statement) {
     environment->define(statement->identifier.lexeme, value);
 }
 
-void Interpreter::visit_assign_statement(ShrAssignStmtPtr statement) {
-    ;
-}
-
 void Interpreter::visit_if_statement(ShrIfStmtPtr statement) {
     bool condition = get_truthiness(evaluate(statement->expression));
     if (condition)
@@ -452,7 +447,8 @@ void Interpreter::visit_if_statement(ShrIfStmtPtr statement) {
 }
 
 void Interpreter::visit_while_statement(ShrWhileStmtPtr statement) {
-    ;
+    while (get_truthiness(evaluate(statement->expression)))
+        execute(statement->statements);
 }
 
 void Interpreter::visit_for_statement(ShrForStmtPtr statement) {

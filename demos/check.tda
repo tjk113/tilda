@@ -1,0 +1,2 @@
+const num = 0b00000100
+print(num@2)

@@ -1,0 +1,7 @@
+{
+    int tmp = 0
+    while (tmp < 10) {
+        print tmp + 1
+        tmp = tmp + 1
+    }
+}

@@ -44,8 +44,8 @@ void IfStatement::accept(StatementVisitor& visitor) {
     return visitor.visit_if_statement(shared_from_this());
 }
 
-WhileStatement::WhileStatement(ShrExprPtr expression) :
-    expression(expression) {}
+WhileStatement::WhileStatement(ShrExprPtr expression, ShrStmtPtr statements) :
+    expression(expression), statements(statements) {}
 
 void WhileStatement::accept(StatementVisitor& visitor) {
     return visitor.visit_while_statement(shared_from_this());

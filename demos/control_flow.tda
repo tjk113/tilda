@@ -1,0 +1,7 @@
+i32 not_zero = 0
+if (!not_zero) {
+    print("Well, it's zero.")
+}
+while (not_zero) {
+    print("Stop me!")
+}
